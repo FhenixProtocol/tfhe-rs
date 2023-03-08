@@ -19,3 +19,7 @@ dieharder_run.log
 
 # Coverage reports
 ./coverage/
+
+# Sampling tool stuff
+venv/
+**/*.algo_sample_acquistion
