@@ -82,7 +82,7 @@ impl IntegerClientKey {
         }
     }
 
-    #[cfg(feature = "__wasm_api")]
+    #[cfg(any(feature = "__wasm_api", all(target_arch = "wasm32", target_os = "unknown")))]
     pub(crate) fn block_parameters(&self) -> Option<crate::shortint::parameters::PBSParameters> {
         self.key.as_ref().map(|key| key.parameters())
     }
