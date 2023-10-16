@@ -44,7 +44,7 @@ pub trait RandomGenerable<D: Distribution>
 where
     Self: Sized,
 {
-    type CustomModulus;
+    type CustomModulus: Copy;
 
     fn generate_one<G: ByteRandomGenerator>(
         generator: &mut RandomGenerator<G>,
@@ -69,6 +69,17 @@ where
     ) {
         slice.iter_mut().for_each(|s| {
             *s = Self::generate_one(generator, distribution);
+        });
+    }
+
+    fn fill_slice_custom_mod<G: ByteRandomGenerator>(
+        generator: &mut RandomGenerator<G>,
+        distribution: D,
+        slice: &mut [Self],
+        custom_modulus: Self::CustomModulus,
+    ) {
+        slice.iter_mut().for_each(|s| {
+            *s = Self::generate_one_custom_modulus(generator, distribution, custom_modulus);
         });
     }
 }
