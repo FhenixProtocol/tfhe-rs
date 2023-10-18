@@ -42,6 +42,9 @@ fn lwe_encrypt_pks_to_glwe_decrypt_custom_mod<Scalar: UnsignedTorus>(params: Tes
                 &mut rsc.secret_random_generator,
             );
 
+            // TODO réfléchir à comment extraire les fonctions coûteuse de génération de clé
+            // TODO -> faire une fonction externe contenant des #[cfg(feature)] dont l'une appelant
+            // le KEY_CACHE et l'autre appelant la fonction normalement.
             let pksk = allocate_and_generate_new_lwe_packing_keyswitch_key(
                 &lwe_sk,
                 &glwe_sk,

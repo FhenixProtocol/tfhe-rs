@@ -1,4 +1,7 @@
 use super::*;
+use crate::core_crypto::keycache::{KeyCacheAccess, KEY_CACHE};
+use serde::de::DeserializeOwned;
+use serde::Serialize;
 
 #[cfg(not(feature = "__coverage"))]
 const NB_TESTS: usize = 10;
@@ -25,7 +28,14 @@ pub struct MultiBitParams<Scalar: UnsignedInteger> {
 }
 
 fn lwe_encrypt_multi_bit_pbs_decrypt_custom_mod<
-    Scalar: UnsignedTorus + Sync + Send + CastFrom<usize> + CastInto<usize>,
+    Scalar: UnsignedTorus
+        + Sync
+        + Send
+        + CastFrom<usize>
+        + CastInto<usize>
+        + KeyCacheAccess
+        + Serialize
+        + DeserializeOwned,
 >(
     params: MultiBitParams<Scalar>,
 ) {
@@ -78,24 +88,47 @@ fn lwe_encrypt_multi_bit_pbs_decrypt_custom_mod<
     );
     let output_lwe_secret_key = output_glwe_secret_key.clone().into_lwe_secret_key();
 
-    let mut bsk = LweMultiBitBootstrapKey::new(
+    // let mut bsk = LweMultiBitBootstrapKey::new(
+    //     Scalar::ZERO,
+    //     glwe_dimension.to_glwe_size(),
+    //     polynomial_size,
+    //     decomp_base_log,
+    //     decomp_level_count,
+    //     input_lwe_dimension,
+    //     grouping_factor,
+    //     ciphertext_modulus,
+    // );
+    //
+    // par_generate_lwe_multi_bit_bootstrap_key(
+    //     &input_lwe_secret_key,
+    //     &output_glwe_secret_key,
+    //     &mut bsk,
+    //     glwe_modular_std_dev,
+    //     &mut rsc.encryption_random_generator,
+    // );
+
+    let shared = KEY_CACHE.get_multi_bit_key(
         Scalar::ZERO,
         glwe_dimension.to_glwe_size(),
+        glwe_modular_std_dev,
         polynomial_size,
         decomp_base_log,
         decomp_level_count,
         input_lwe_dimension,
         grouping_factor,
         ciphertext_modulus,
-    );
-
-    par_generate_lwe_multi_bit_bootstrap_key(
         &input_lwe_secret_key,
         &output_glwe_secret_key,
-        &mut bsk,
-        glwe_modular_std_dev,
         &mut rsc.encryption_random_generator,
     );
+    let mut bsk = shared.key().clone();
+
+    // TODO Effectuer cette génération en utilisant le keycache aussi (mettre tout dans le
+    // get_multi_bit_key)
+    // TODO monitorer la fonction et comparer les temps d'exécution entre
+    // coverage et non-coverage
+    // FIXME Comment gérer le design entre coverage et non-coverage
+    // (faire un appel à une fonction avec des [cfg] ?) -> voir avec Arthur
 
     assert!(check_content_respects_mod(&*bsk, ciphertext_modulus));
 
