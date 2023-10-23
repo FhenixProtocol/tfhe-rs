@@ -1,6 +1,6 @@
 use crate::core_crypto::algorithms::*;
 use crate::core_crypto::entities::*;
-use crate::shortint::ciphertext::Degree;
+use crate::shortint::ciphertext::{Degree, NoiseLevel};
 use crate::shortint::engine::{EngineResult, ShortintEngine};
 use crate::shortint::{Ciphertext, ServerKey};
 
@@ -24,6 +24,7 @@ impl ShortintEngine {
         match scalar {
             0 => {
                 trivially_encrypt_lwe_ciphertext(&mut ct.ct, Plaintext(0));
+                ct.noise_level = NoiseLevel::ZERO;
                 ct.degree = Degree(0);
             }
             1 => {
@@ -34,6 +35,7 @@ impl ShortintEngine {
                 let cleartext_scalar = Cleartext(scalar);
                 lwe_ciphertext_cleartext_mul_assign(&mut ct.ct, cleartext_scalar);
 
+                ct.noise_level *= scalar as usize;
                 ct.degree = Degree(ct.degree.0 * scalar as usize);
             }
         }

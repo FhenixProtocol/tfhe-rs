@@ -368,6 +368,7 @@ impl ShortintEngine {
         };
 
         ct.degree = acc.degree;
+        ct.noise_level = NoiseLevel::NOMINAL;
 
         Ok(())
     }
@@ -630,6 +631,7 @@ impl ShortintEngine {
         );
 
         ct.degree = acc.degree;
+        ct.noise_level = NoiseLevel::NOMINAL;
 
         Ok(())
     }
@@ -778,6 +780,8 @@ impl ShortintEngine {
         trivially_encrypt_lwe_ciphertext(&mut ct.ct, encoded);
 
         ct.degree = Degree(modular_value);
+        ct.noise_level = NoiseLevel::ZERO;
+
         Ok(())
     }
 }
