@@ -190,16 +190,20 @@ impl From<CompressedSignedRadixCiphertext> for SignedRadixCiphertext {
     }
 }
 
-pub trait IntegerCiphertext: Clone {
-    fn from_blocks(blocks: Vec<Ciphertext>) -> Self;
+pub trait IntegerCiphertextRef {
     fn blocks(&self) -> &[Ciphertext];
-    fn blocks_mut(&mut self) -> &mut [Ciphertext];
     fn moduli(&self) -> Vec<u64> {
         self.blocks()
             .iter()
             .map(|x| x.message_modulus.0 as u64)
             .collect()
     }
+}
+
+pub trait IntegerCiphertext: Clone + IntegerCiphertextRef {
+    fn from_blocks(blocks: Vec<Ciphertext>) -> Self;
+
+    fn blocks_mut(&mut self) -> &mut [Ciphertext];
 }
 
 pub trait IntegerRadixCiphertext: IntegerCiphertext + Sync + Send + From<Vec<Ciphertext>> {
@@ -221,14 +225,17 @@ pub trait IntegerRadixCiphertext: IntegerCiphertext + Sync + Send + From<Vec<Cip
     fn into_blocks(self) -> Vec<Ciphertext>;
 }
 
+impl IntegerCiphertextRef for RadixCiphertext {
+    fn blocks(&self) -> &[Ciphertext] {
+        &self.blocks
+    }
+}
+
 impl IntegerCiphertext for RadixCiphertext {
     fn from_blocks(blocks: Vec<Ciphertext>) -> Self {
         Self::from(blocks)
     }
 
-    fn blocks(&self) -> &[Ciphertext] {
-        &self.blocks
-    }
     fn blocks_mut(&mut self) -> &mut [Ciphertext] {
         &mut self.blocks
     }
@@ -242,18 +249,20 @@ impl IntegerRadixCiphertext for RadixCiphertext {
     }
 }
 
+impl IntegerCiphertextRef for SignedRadixCiphertext {
+    fn blocks(&self) -> &[Ciphertext] {
+        &self.blocks
+    }
+}
 impl IntegerCiphertext for SignedRadixCiphertext {
     fn from_blocks(blocks: Vec<Ciphertext>) -> Self {
         Self::from(blocks)
     }
-    fn blocks(&self) -> &[Ciphertext] {
-        &self.blocks
-    }
+
     fn blocks_mut(&mut self) -> &mut [Ciphertext] {
         &mut self.blocks
     }
 }
-
 impl IntegerRadixCiphertext for SignedRadixCiphertext {
     const IS_SIGNED: bool = true;
 
@@ -262,20 +271,20 @@ impl IntegerRadixCiphertext for SignedRadixCiphertext {
     }
 }
 
+impl IntegerCiphertextRef for CrtCiphertext {
+    fn blocks(&self) -> &[Ciphertext] {
+        &self.blocks
+    }
+}
+
 impl IntegerCiphertext for CrtCiphertext {
     fn from_blocks(blocks: Vec<Ciphertext>) -> Self {
         let moduli = blocks.iter().map(|x| x.message_modulus.0 as u64).collect();
         Self { blocks, moduli }
     }
-    fn blocks(&self) -> &[Ciphertext] {
-        &self.blocks
-    }
+
     fn blocks_mut(&mut self) -> &mut [Ciphertext] {
         &mut self.blocks
-    }
-
-    fn moduli(&self) -> Vec<u64> {
-        self.moduli.clone()
     }
 }
 

@@ -1,4 +1,6 @@
-use crate::integer::ciphertext::{IntegerRadixCiphertext, RadixCiphertext, SignedRadixCiphertext};
+use crate::integer::ciphertext::{
+    IntegerCiphertextRef, IntegerRadixCiphertext, RadixCiphertext, SignedRadixCiphertext,
+};
 use crate::integer::server_key::comparator::ZeroComparisonType;
 use crate::integer::{IntegerCiphertext, ServerKey};
 
