@@ -1,5 +1,6 @@
 //! Module with the definition of the ClientKey.
 
+use super::engine::{DecodedNoPadding, DecodedWithPadding};
 use crate::core_crypto::entities::*;
 use crate::shortint::ciphertext::{Ciphertext, CompressedCiphertext};
 use crate::shortint::engine::ShortintEngine;
@@ -247,7 +248,7 @@ impl ClientKey {
     /// // |-------|---------|
     /// // |  0 1  |   1 1   |
     ///
-    /// let dec = cks.decrypt_message_and_carry(&ct);
+    /// let dec = cks.decrypt_radix(&ct);
     /// assert_eq!(msg, dec);
     /// ```
     pub fn unchecked_encrypt(&self, message: u64) -> Ciphertext {
@@ -275,7 +276,7 @@ impl ClientKey {
     /// let ct = cks.encrypt(msg);
     ///
     /// // Decryption:
-    /// let dec = cks.decrypt_message_and_carry(&ct);
+    /// let dec = cks.decrypt_radix(&ct);
     /// assert_eq!(msg, dec);
     ///
     /// let cks = ClientKey::new(PARAM_MESSAGE_2_CARRY_2_PBS_KS);
@@ -284,48 +285,13 @@ impl ClientKey {
     /// let ct = cks.encrypt(msg);
     ///
     /// // Decryption:
-    /// let dec = cks.decrypt_message_and_carry(&ct);
+    /// let dec = cks.decrypt_radix(&ct);
     /// assert_eq!(msg, dec);
     /// ```
-    pub fn decrypt_message_and_carry(&self, ct: &Ciphertext) -> u64 {
+    pub fn decrypt_decode_padding(&self, ct: &Ciphertext) -> DecodedWithPadding {
         ShortintEngine::with_thread_local_mut(|engine| {
-            engine.decrypt_message_and_carry(self, ct).unwrap()
+            engine.decrypt_decode_padding(self, ct).unwrap()
         })
-    }
-
-    /// Decrypt a ciphertext encrypting a message using the client key.
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// use tfhe::shortint::parameters::{
-    ///     PARAM_MESSAGE_2_CARRY_2_KS_PBS, PARAM_MESSAGE_2_CARRY_2_PBS_KS,
-    /// };
-    /// use tfhe::shortint::ClientKey;
-    ///
-    /// // Generate the client key
-    /// let cks = ClientKey::new(PARAM_MESSAGE_2_CARRY_2_KS_PBS);
-    ///
-    /// let msg = 3;
-    ///
-    /// // Encryption of one message:
-    /// let ct = cks.encrypt(msg);
-    ///
-    /// // Decryption:
-    /// let dec = cks.decrypt(&ct);
-    /// assert_eq!(msg, dec);
-    ///
-    /// let cks = ClientKey::new(PARAM_MESSAGE_2_CARRY_2_PBS_KS);
-    ///
-    /// // Encryption of one message:
-    /// let ct = cks.encrypt(msg);
-    ///
-    /// // Decryption:
-    /// let dec = cks.decrypt(&ct);
-    /// assert_eq!(msg, dec);
-    /// ```
-    pub fn decrypt(&self, ct: &Ciphertext) -> u64 {
-        ShortintEngine::with_thread_local_mut(|engine| engine.decrypt(self, ct).unwrap())
     }
 
     /// Encrypt a small integer message using the client key without padding bit.
@@ -344,7 +310,7 @@ impl ClientKey {
     /// let msg = 6;
     /// let ct = cks.encrypt_without_padding(msg);
     ///
-    /// let dec = cks.decrypt_message_and_carry_without_padding(&ct);
+    /// let dec = cks.decrypt_radix_without_padding(&ct);
     /// assert_eq!(msg, dec);
     /// ```
     pub fn encrypt_without_padding(&self, message: u64) -> Ciphertext {
@@ -372,7 +338,7 @@ impl ClientKey {
     ///
     /// let ct = ct.decompress();
     ///
-    /// let dec = cks.decrypt_message_and_carry_without_padding(&ct);
+    /// let dec = cks.decrypt_radix_without_padding(&ct);
     /// assert_eq!(msg, dec);
     /// ```
     pub fn encrypt_without_padding_compressed(&self, message: u64) -> CompressedCiphertext {
@@ -403,7 +369,7 @@ impl ClientKey {
     /// let ct = cks.encrypt_without_padding(msg);
     ///
     /// // Decryption:
-    /// let dec = cks.decrypt_message_and_carry_without_padding(&ct);
+    /// let dec = cks.decrypt_radix_without_padding(&ct);
     /// assert_eq!(msg, dec);
     ///
     /// let cks = ClientKey::new(PARAM_MESSAGE_1_CARRY_1_PBS_KS);
@@ -412,53 +378,12 @@ impl ClientKey {
     /// let ct = cks.encrypt_without_padding(msg);
     ///
     /// // Decryption:
-    /// let dec = cks.decrypt_message_and_carry_without_padding(&ct);
+    /// let dec = cks.decrypt_radix_without_padding(&ct);
     /// assert_eq!(msg, dec);
     /// ```
-    pub fn decrypt_message_and_carry_without_padding(&self, ct: &Ciphertext) -> u64 {
+    pub fn decrypt_decode_without_padding(&self, ct: &Ciphertext) -> DecodedNoPadding {
         ShortintEngine::with_thread_local_mut(|engine| {
-            engine
-                .decrypt_message_and_carry_without_padding(self, ct)
-                .unwrap()
-        })
-    }
-
-    /// Decrypt a ciphertext encrypting an integer message using the client key,
-    /// where the ciphertext is assumed to not have any padding bit.
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// use tfhe::shortint::parameters::{
-    ///     PARAM_MESSAGE_2_CARRY_2_KS_PBS, PARAM_MESSAGE_2_CARRY_2_PBS_KS,
-    /// };
-    /// use tfhe::shortint::ClientKey;
-    ///
-    /// // Generate the client key
-    /// let cks = ClientKey::new(PARAM_MESSAGE_2_CARRY_2_KS_PBS);
-    ///
-    /// let msg = 7;
-    /// let modulus = 4;
-    ///
-    /// // Encryption of one message:
-    /// let ct = cks.encrypt_without_padding(msg);
-    ///
-    /// // Decryption:
-    /// let dec = cks.decrypt_without_padding(&ct);
-    /// assert_eq!(msg % modulus, dec);
-    ///
-    /// let cks = ClientKey::new(PARAM_MESSAGE_2_CARRY_2_PBS_KS);
-    ///
-    /// // Encryption of one message:
-    /// let ct = cks.encrypt_without_padding(msg);
-    ///
-    /// // Decryption:
-    /// let dec = cks.decrypt_without_padding(&ct);
-    /// assert_eq!(msg % modulus, dec);
-    /// ```
-    pub fn decrypt_without_padding(&self, ct: &Ciphertext) -> u64 {
-        ShortintEngine::with_thread_local_mut(|engine| {
-            engine.decrypt_without_padding(self, ct).unwrap()
+            engine.decrypt_decode_without_padding(self, ct).unwrap()
         })
     }
 

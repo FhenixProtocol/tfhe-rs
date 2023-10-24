@@ -20,6 +20,8 @@ use std::fmt::Debug;
 use super::parameters::MessageModulus;
 use super::server_key::BivariateLookupTable;
 
+pub use client_side::{DecodedNoPadding, DecodedWithPadding};
+
 mod client_side;
 mod public_side;
 mod server_side;
