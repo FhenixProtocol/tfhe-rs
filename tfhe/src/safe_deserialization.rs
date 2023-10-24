@@ -148,8 +148,8 @@ mod test_shortint {
         )
         .unwrap();
 
-        let dec = ck.decrypt(&ct2);
-        assert_eq!(msg, dec);
+        let dec = ck.decrypt_decode_padding(&ct2);
+        assert_eq!(msg, dec.msg);
     }
 }
 

@@ -300,10 +300,10 @@ where
         let ct = cks.encrypt(clear);
 
         // decryption of ct
-        let dec = cks.decrypt(&ct);
+        let dec = cks.decrypt_decode_padding(&ct);
 
         // assert
-        assert_eq!(clear, dec);
+        assert_eq!(clear, dec.msg);
     }
 }
 
@@ -328,10 +328,10 @@ where
         let ct = cks.encrypt_with_message_modulus(clear, MessageModulus(modulus as usize));
 
         // decryption of ct_zero
-        let dec = cks.decrypt(&ct);
+        let dec = cks.decrypt_decode_padding(&ct);
 
         // assert
-        assert_eq!(clear, dec);
+        assert_eq!(clear, dec.msg);
     }
 }
 
@@ -353,10 +353,10 @@ where
         let ct = cks.encrypt_without_padding(clear);
 
         // decryption of ct_zero
-        let dec = cks.decrypt_message_and_carry_without_padding(&ct);
+        let dec = cks.decrypt_decode_without_padding(&ct);
 
         // assert
-        assert_eq!(clear, dec);
+        assert_eq!(clear, dec.carry_and_msg);
     }
 }
 
@@ -383,13 +383,13 @@ where
         let ct_res = sks.message_extract(&ctxt_0);
 
         // decryption of ct_res
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
-        if clear_0 != dec_res {
+        if clear_0 != dec_res.msg {
             failures += 1;
         }
         // assert
-        // assert_eq!(clear_0, dec_res);
+        // assert_eq!(clear_0, dec_res.msg);
     }
 
     println!("fail_rate = {failures}/{NB_TEST}");
@@ -419,10 +419,10 @@ where
         let ct_res = sks.apply_lookup_table(&ctxt_0, &acc);
 
         // decryption of ct_res
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
         // assert
-        assert_eq!(clear_0, dec_res);
+        assert_eq!(clear_0, dec_res.msg);
     }
 }
 
@@ -450,10 +450,10 @@ where
         let ct_res = sks.unchecked_apply_lookup_table_bivariate(&ctxt_0, &ctxt_1, &acc);
 
         // decryption of ct_res
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
         // assert
-        assert_eq!((2 * clear_0 * clear_1) % modulus, dec_res);
+        assert_eq!((2 * clear_0 * clear_1) % modulus, dec_res.msg);
     }
 }
 
@@ -482,14 +482,15 @@ where
         let ct_carry = sks.carry_extract(&ctxt);
 
         // decryption of message and carry
-        let dec = cks.decrypt_message_and_carry(&ct_carry);
+        let dec = cks.decrypt_decode_padding(&ct_carry);
 
         // assert
         println!(
             "msg = {clear}, modulus = {msg_modulus}, msg/modulus = {}",
             clear / msg_modulus
         );
-        assert_eq!(clear / msg_modulus, dec);
+        assert_eq!(clear / msg_modulus, dec.msg);
+        assert_eq!(dec.carry, 0);
     }
 }
 
@@ -518,10 +519,10 @@ where
         let ct_msg = sks.message_extract(&ctxt);
 
         // decryption of ct_msg
-        let dec = cks.decrypt(&ct_msg);
+        let dec = cks.decrypt_decode_padding(&ct_msg);
 
         // assert
-        assert_eq!(clear % modulus, dec);
+        assert_eq!(clear % modulus, dec.msg);
     }
 }
 
@@ -549,10 +550,10 @@ where
         let ct_res = sks.apply_lookup_table(&ct, &acc);
 
         // decryption of ct_res
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
         // assert
-        assert_eq!((clear * 2) % modulus, dec_res);
+        assert_eq!((clear * 2) % modulus, dec_res.msg);
     }
 }
 
@@ -582,7 +583,7 @@ where
         let ct_res = sks.unchecked_add(&ctxt_0, &ctxt_1);
 
         // decryption of ct_res
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
         // assert
         println!(
@@ -590,7 +591,7 @@ where
             cks.parameters.carry_modulus().0,
             cks.parameters.message_modulus().0
         );
-        assert_eq!((clear_0 + clear_1) % modulus, dec_res);
+        assert_eq!((clear_0 + clear_1) % modulus, dec_res.msg);
     }
 }
 
@@ -629,10 +630,10 @@ where
             clear += clear_0;
 
             // decryption of ct_res
-            let dec_res = cks.decrypt(&ct_res);
+            let dec_res = cks.decrypt_decode_padding(&ct_res);
 
             // assert
-            assert_eq!(clear % modulus, dec_res);
+            assert_eq!(clear % modulus, dec_res.msg);
         }
     }
 }
@@ -666,9 +667,9 @@ where
         let clear_res = clear_0 + clear_1;
 
         // decryption of ct_res
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
-        assert_eq!(clear_res % modulus, dec_res);
+        assert_eq!(clear_res % modulus, dec_res.msg);
     }
 }
 
@@ -707,10 +708,10 @@ where
             clear += clear_0;
 
             // decryption of ct_res
-            let dec_res = cks.decrypt(&ct_res);
+            let dec_res = cks.decrypt_decode_padding(&ct_res);
 
             // assert
-            assert_eq!(clear % modulus, dec_res);
+            assert_eq!(clear % modulus, dec_res.msg);
         }
     }
 }
@@ -750,10 +751,10 @@ where
             clear += clear_0;
 
             // decryption of ct_res
-            let dec_res = cks.decrypt(&ct_res);
+            let dec_res = cks.decrypt_decode_padding(&ct_res);
 
             // assert
-            assert_eq!(clear % modulus, dec_res);
+            assert_eq!(clear % modulus, dec_res.msg);
         }
     }
 }
@@ -783,10 +784,10 @@ where
         let ct_res = sks.unchecked_bitand(&ctxt_0, &ctxt_1);
 
         // decryption of ct_res
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
         // assert
-        assert_eq!(clear_0 & clear_1, dec_res);
+        assert_eq!(clear_0 & clear_1, dec_res.msg);
     }
 }
 
@@ -816,10 +817,10 @@ where
         let ct_res = sks.unchecked_bitor(&ctxt_0, &ctxt_1);
 
         // decryption of ct_res
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
         // assert
-        assert_eq!(clear_0 | clear_1, dec_res);
+        assert_eq!(clear_0 | clear_1, dec_res.msg);
     }
 }
 
@@ -849,10 +850,10 @@ where
         let ct_res = sks.unchecked_bitxor(&ctxt_0, &ctxt_1);
 
         // decryption of ct_res
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
         // assert
-        assert_eq!(clear_0 ^ clear_1, dec_res);
+        assert_eq!(clear_0 ^ clear_1, dec_res.msg);
     }
 }
 
@@ -875,9 +876,9 @@ where
 
         let ct_res = sks.unchecked_scalar_bitxor(&ctxt_0, clear_1 as u8);
 
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
-        assert_eq!(clear_0 ^ clear_1, dec_res);
+        assert_eq!(clear_0 ^ clear_1, dec_res.msg);
     }
 }
 
@@ -900,9 +901,9 @@ where
 
         let ct_res = sks.unchecked_scalar_bitor(&ctxt_0, clear_1 as u8);
 
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
-        assert_eq!(clear_0 | clear_1, dec_res);
+        assert_eq!(clear_0 | clear_1, dec_res.msg);
     }
 }
 
@@ -926,9 +927,9 @@ where
 
         let ct_res = sks.unchecked_scalar_bitand(&ctxt_0, clear_1 as u8);
 
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
-        assert_eq!(clear_0 & clear_1, dec_res);
+        assert_eq!(clear_0 & clear_1, dec_res.msg);
     }
 }
 
@@ -966,10 +967,10 @@ where
         let ct_res = sks.smart_bitand(&mut ctxt_0, &mut ctxt_1);
 
         // decryption of ct_res
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
         // assert
-        assert_eq!((clear_0 & clear_1) % modulus, dec_res);
+        assert_eq!((clear_0 & clear_1) % modulus, dec_res.msg);
     }
 }
 
@@ -1000,10 +1001,10 @@ where
         let ct_res = sks.smart_scalar_bitand(&mut ctxt_0, clear_1 as u8);
 
         // decryption of ct_res
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
         // assert
-        assert_eq!(clear_0 & clear_1, dec_res);
+        assert_eq!(clear_0 & clear_1, dec_res.msg);
     }
 }
 
@@ -1041,10 +1042,10 @@ where
         let ct_res = sks.bitand(&ctxt_0, &ctxt_1);
 
         // decryption of ct_res
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
         // assert
-        assert_eq!((clear_0 & clear_1) % modulus, dec_res);
+        assert_eq!((clear_0 & clear_1) % modulus, dec_res.msg);
     }
 }
 
@@ -1073,9 +1074,9 @@ where
 
         let ct_res = sks.scalar_bitand(&ctxt_0, clear_1 as u8);
 
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
-        assert_eq!(clear_0 & clear_1, dec_res);
+        assert_eq!(clear_0 & clear_1, dec_res.msg);
     }
 }
 
@@ -1113,10 +1114,10 @@ where
         let ct_res = sks.smart_bitor(&mut ctxt_0, &mut ctxt_1);
 
         // decryption of ct_res
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
         // assert
-        assert_eq!((clear_0 | clear_1) % modulus, dec_res);
+        assert_eq!((clear_0 | clear_1) % modulus, dec_res.msg);
     }
 }
 
@@ -1147,10 +1148,10 @@ where
         let ct_res = sks.smart_scalar_bitor(&mut ctxt_0, clear_1 as u8);
 
         // decryption of ct_res
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
         // assert
-        assert_eq!((clear_0 | clear_1) % modulus, dec_res);
+        assert_eq!((clear_0 | clear_1) % modulus, dec_res.msg);
     }
 }
 
@@ -1188,10 +1189,10 @@ where
         let ct_res = sks.bitor(&ctxt_0, &ctxt_1);
 
         // decryption of ct_res
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
         // assert
-        assert_eq!((clear_0 | clear_1) % modulus, dec_res);
+        assert_eq!((clear_0 | clear_1) % modulus, dec_res.msg);
     }
 }
 
@@ -1220,9 +1221,9 @@ where
 
         let ct_res = sks.scalar_bitor(&ctxt_0, clear_1 as u8);
 
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
-        assert_eq!((clear_0 | clear_1) % modulus, dec_res);
+        assert_eq!((clear_0 | clear_1) % modulus, dec_res.msg);
     }
 }
 
@@ -1260,10 +1261,10 @@ where
         let ct_res = sks.smart_bitxor(&mut ctxt_0, &mut ctxt_1);
 
         // decryption of ct_res
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
         // assert
-        assert_eq!((clear_0 ^ clear_1) % modulus, dec_res);
+        assert_eq!((clear_0 ^ clear_1) % modulus, dec_res.msg);
     }
 }
 
@@ -1294,10 +1295,10 @@ where
         let ct_res = sks.smart_scalar_bitxor(&mut ctxt_0, clear_1 as u8);
 
         // decryption of ct_res
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
         // assert
-        assert_eq!((clear_0 ^ clear_1) % modulus, dec_res);
+        assert_eq!((clear_0 ^ clear_1) % modulus, dec_res.msg);
     }
 }
 
@@ -1335,10 +1336,10 @@ where
         let ct_res = sks.bitxor(&ctxt_0, &ctxt_1);
 
         // decryption of ct_res
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
         // assert
-        assert_eq!((clear_0 ^ clear_1) % modulus, dec_res);
+        assert_eq!((clear_0 ^ clear_1) % modulus, dec_res.msg);
     }
 }
 
@@ -1367,9 +1368,9 @@ where
 
         let ct_res = sks.scalar_bitxor(&ctxt_0, clear_1 as u8);
 
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
-        assert_eq!((clear_0 ^ clear_1) % modulus, dec_res);
+        assert_eq!((clear_0 ^ clear_1) % modulus, dec_res.msg);
     }
 }
 
@@ -1399,10 +1400,10 @@ where
         let ct_res = sks.unchecked_greater(&ctxt_0, &ctxt_1);
 
         // decryption of ct_res
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
         // assert
-        assert_eq!((clear_0 > clear_1) as u64, dec_res);
+        assert_eq!((clear_0 > clear_1) as u64, dec_res.msg);
     }
 }
 
@@ -1432,10 +1433,10 @@ where
         let ct_res = sks.smart_greater(&mut ctxt_0, &mut ctxt_1);
 
         // decryption of ct_res
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
         // assert
-        assert_eq!((clear_0 > clear_1) as u64, dec_res);
+        assert_eq!((clear_0 > clear_1) as u64, dec_res.msg);
     }
 }
 
@@ -1465,10 +1466,10 @@ where
         let ct_res = sks.greater(&ctxt_0, &ctxt_1);
 
         // decryption of ct_res
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
         // assert
-        assert_eq!((clear_0 > clear_1) as u64, dec_res);
+        assert_eq!((clear_0 > clear_1) as u64, dec_res.msg);
     }
 }
 
@@ -1498,10 +1499,10 @@ where
         let ct_res = sks.unchecked_greater_or_equal(&ctxt_0, &ctxt_1);
 
         // decryption of ct_res
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
         // assert
-        assert_eq!((clear_0 >= clear_1) as u64, dec_res);
+        assert_eq!((clear_0 >= clear_1) as u64, dec_res.msg);
     }
 }
 
@@ -1539,10 +1540,10 @@ where
         let ct_res = sks.smart_greater_or_equal(&mut ctxt_0, &mut ctxt_1);
 
         // decryption of ct_res
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
         // assert
-        assert_eq!((clear_0 >= clear_1) as u64, dec_res);
+        assert_eq!((clear_0 >= clear_1) as u64, dec_res.msg);
     }
 }
 
@@ -1580,10 +1581,10 @@ where
         let ct_res = sks.greater_or_equal(&ctxt_0, &ctxt_1);
 
         // decryption of ct_res
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
         // assert
-        assert_eq!((clear_0 >= clear_1) as u64, dec_res);
+        assert_eq!((clear_0 >= clear_1) as u64, dec_res.msg);
     }
 }
 
@@ -1613,10 +1614,10 @@ where
         let ct_res = sks.unchecked_less(&ctxt_0, &ctxt_1);
 
         // decryption of ct_res
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
         // assert
-        assert_eq!((clear_0 < clear_1) as u64, dec_res);
+        assert_eq!((clear_0 < clear_1) as u64, dec_res.msg);
     }
 }
 
@@ -1654,10 +1655,10 @@ where
         let ct_res = sks.smart_less(&mut ctxt_0, &mut ctxt_1);
 
         // decryption of ct_res
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
         // assert
-        assert_eq!((clear_0 < clear_1) as u64, dec_res);
+        assert_eq!((clear_0 < clear_1) as u64, dec_res.msg);
     }
 }
 
@@ -1695,10 +1696,10 @@ where
         let ct_res = sks.less(&ctxt_0, &ctxt_1);
 
         // decryption of ct_res
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
         // assert
-        assert_eq!((clear_0 < clear_1) as u64, dec_res);
+        assert_eq!((clear_0 < clear_1) as u64, dec_res.msg);
     }
 }
 
@@ -1728,10 +1729,10 @@ where
         let ct_res = sks.unchecked_less_or_equal(&ctxt_0, &ctxt_1);
 
         // decryption of ct_res
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
         // assert
-        assert_eq!((clear_0 <= clear_1) as u64, dec_res);
+        assert_eq!((clear_0 <= clear_1) as u64, dec_res.msg);
     }
 }
 
@@ -1761,10 +1762,10 @@ where
         let ct_res = sks.unchecked_less_or_equal(&ctxt_0, &ctxt_1);
 
         // decryption of ct_res
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
         // assert
-        assert_eq!((clear_0 <= clear_1) as u64, dec_res);
+        assert_eq!((clear_0 <= clear_1) as u64, dec_res.msg);
     }
 }
 
@@ -1802,10 +1803,13 @@ where
         let ct_res = sks.smart_less_or_equal(&mut ctxt_0, &mut ctxt_1);
 
         // decryption of ct_res
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
         // assert
-        assert_eq!(((clear_0 % modulus) <= (clear_1 % modulus)) as u64, dec_res);
+        assert_eq!(
+            ((clear_0 % modulus) <= (clear_1 % modulus)) as u64,
+            dec_res.msg
+        );
     }
 }
 
@@ -1843,10 +1847,13 @@ where
         let ct_res = sks.less_or_equal(&ctxt_0, &ctxt_1);
 
         // decryption of ct_res
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
         // assert
-        assert_eq!(((clear_0 % modulus) <= (clear_1 % modulus)) as u64, dec_res);
+        assert_eq!(
+            ((clear_0 % modulus) <= (clear_1 % modulus)) as u64,
+            dec_res.msg
+        );
     }
 }
 
@@ -1875,10 +1882,10 @@ where
         let ct_res = sks.unchecked_equal(&ctxt_0, &ctxt_1);
 
         // decryption of ct_res
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
         // assert
-        assert_eq!((clear_0 == clear_1) as u64, dec_res);
+        assert_eq!((clear_0 == clear_1) as u64, dec_res.msg);
     }
 }
 
@@ -1916,10 +1923,13 @@ where
         let ct_res = sks.smart_equal(&mut ctxt_0, &mut ctxt_1);
 
         // decryption of ct_res
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
         // assert
-        assert_eq!(((clear_0 % modulus) == (clear_1 % modulus)) as u64, dec_res);
+        assert_eq!(
+            ((clear_0 % modulus) == (clear_1 % modulus)) as u64,
+            dec_res.msg
+        );
     }
 }
 
@@ -1957,10 +1967,13 @@ where
         let ct_res = sks.equal(&ctxt_0, &ctxt_1);
 
         // decryption of ct_res
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
         // assert
-        assert_eq!(((clear_0 % modulus) == (clear_1 % modulus)) as u64, dec_res);
+        assert_eq!(
+            ((clear_0 % modulus) == (clear_1 % modulus)) as u64,
+            dec_res.msg
+        );
     }
 }
 
@@ -1989,10 +2002,10 @@ where
         let ct_res = sks.smart_scalar_equal(&mut ctxt, scalar);
 
         // decryption of ct_res
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
         // assert
-        assert_eq!((clear == scalar as u64) as u64, dec_res);
+        assert_eq!((clear == scalar as u64) as u64, dec_res.msg);
     }
 }
 
@@ -2021,10 +2034,10 @@ where
         let ct_res = sks.smart_scalar_less(&mut ctxt, scalar);
 
         // decryption of ct_res
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
         // assert
-        assert_eq!((clear < scalar as u64) as u64, dec_res);
+        assert_eq!((clear < scalar as u64) as u64, dec_res.msg);
     }
 }
 
@@ -2053,10 +2066,10 @@ where
         let ct_res = sks.smart_scalar_less_or_equal(&mut ctxt, scalar);
 
         // decryption of ct_res
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
         // assert
-        assert_eq!((clear <= scalar as u64) as u64, dec_res);
+        assert_eq!((clear <= scalar as u64) as u64, dec_res.msg);
     }
 }
 
@@ -2085,10 +2098,10 @@ where
         let ct_res = sks.smart_scalar_greater(&mut ctxt, scalar);
 
         // decryption of ct_res
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
         // assert
-        assert_eq!((clear > scalar as u64) as u64, dec_res);
+        assert_eq!((clear > scalar as u64) as u64, dec_res.msg);
     }
 }
 
@@ -2117,10 +2130,10 @@ where
         let ct_res = sks.smart_scalar_greater_or_equal(&mut ctxt, scalar);
 
         // decryption of ct_res
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
         // assert
-        assert_eq!((clear >= scalar as u64) as u64, dec_res);
+        assert_eq!((clear >= scalar as u64) as u64, dec_res.msg);
     }
 }
 
@@ -2145,8 +2158,8 @@ where
         let ct_denom = cks.encrypt(denominator);
         let ct_res = sks.unchecked_div(&ct_num, &ct_denom);
 
-        let res = cks.decrypt(&ct_res);
-        assert_eq!(res, (ct_num.message_modulus.0 - 1) as u64)
+        let res = cks.decrypt_decode_padding(&ct_res);
+        assert_eq!(res.msg, (ct_num.message_modulus.0 - 1) as u64)
     }
 
     for _ in 0..NB_TEST {
@@ -2163,10 +2176,10 @@ where
         let ct_res = sks.unchecked_div(&ctxt_0, &ctxt_1);
 
         // decryption of ct_res
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
         // assert
-        assert_eq!(clear_0 / clear_1, dec_res);
+        assert_eq!(clear_0 / clear_1, dec_res.msg);
     }
 }
 
@@ -2193,10 +2206,10 @@ where
         let ct_res = sks.unchecked_scalar_div(&ctxt_0, clear_1 as u8);
 
         // decryption of ct_res
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
         // assert
-        assert_eq!(clear_0 / clear_1, dec_res);
+        assert_eq!(clear_0 / clear_1, dec_res.msg);
     }
 }
 
@@ -2223,10 +2236,10 @@ where
         let ct_res = sks.unchecked_scalar_mod(&ctxt_0, clear_1 as u8);
 
         // decryption of ct_res
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
         // assert
-        assert_eq!(clear_0 % clear_1, dec_res);
+        assert_eq!(clear_0 % clear_1, dec_res.msg);
     }
 }
 
@@ -2256,10 +2269,10 @@ where
         let ct_res = sks.unchecked_mul_lsb(&ctxt_0, &ctxt_1);
 
         // decryption of ct_res
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
         // assert
-        assert_eq!((clear_0 * clear_1) % modulus, dec_res);
+        assert_eq!((clear_0 * clear_1) % modulus, dec_res.msg);
     }
 }
 
@@ -2289,10 +2302,10 @@ where
         let ct_res = sks.unchecked_mul_msb(&ctxt_0, &ctxt_1);
 
         // decryption of ct_res
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
         // assert
-        assert_eq!((clear_0 * clear_1) / modulus, dec_res);
+        assert_eq!((clear_0 * clear_1) / modulus, dec_res.msg);
     }
 }
 
@@ -2324,9 +2337,9 @@ where
 
         let mut clear = clear_0 * clear_1;
 
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
-        assert_eq!(clear % modulus, dec_res);
+        assert_eq!(clear % modulus, dec_res.msg);
 
         // multiply several times to raise the degree
         for _ in 0..NB_SUB_TEST_SMART {
@@ -2334,10 +2347,10 @@ where
             clear = (clear * clear_0) % modulus;
 
             // decryption of ct_res
-            let dec_res = cks.decrypt(&ct_res);
+            let dec_res = cks.decrypt_decode_padding(&ct_res);
 
             // assert
-            assert_eq!(clear, dec_res);
+            assert_eq!(clear, dec_res.msg);
         }
     }
 }
@@ -2370,9 +2383,9 @@ where
 
         let clear = clear_0 * clear_1;
 
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
-        assert_eq!(clear % modulus, dec_res);
+        assert_eq!(clear % modulus, dec_res.msg);
     }
 }
 
@@ -2404,9 +2417,9 @@ where
 
         let mut clear = (clear_0 * clear_1) / modulus;
 
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
-        assert_eq!(clear % modulus, dec_res);
+        assert_eq!(clear % modulus, dec_res.msg);
 
         // multiply several times to raise the degree
         for _ in 0..NB_SUB_TEST_SMART {
@@ -2414,10 +2427,10 @@ where
             clear = (clear * clear_0) / modulus;
 
             // decryption of ct_res
-            let dec_res = cks.decrypt(&ct_res);
+            let dec_res = cks.decrypt_decode_padding(&ct_res);
 
             // assert
-            assert_eq!(clear % modulus, dec_res);
+            assert_eq!(clear % modulus, dec_res.msg);
         }
     }
 }
@@ -2450,9 +2463,9 @@ where
 
         let clear = (clear_0 * clear_1) / modulus;
 
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
-        assert_eq!(clear % modulus, dec_res);
+        assert_eq!(clear % modulus, dec_res.msg);
     }
 }
 
@@ -2479,12 +2492,12 @@ where
         let ct_tmp = sks.unchecked_neg(&ctxt);
 
         // Decrypt the result
-        let dec = cks.decrypt(&ct_tmp);
+        let dec = cks.decrypt_decode_padding(&ct_tmp);
 
         // Check the correctness
         let clear_result = clear.wrapping_neg() % modulus;
 
-        assert_eq!(clear_result, dec);
+        assert_eq!(clear_result, dec.msg);
     }
 }
 
@@ -2516,10 +2529,10 @@ where
             clear_result = clear_result.wrapping_neg() % modulus;
 
             // decryption of ct_res
-            let dec_res = cks.decrypt(&ct_res);
+            let dec_res = cks.decrypt_decode_padding(&ct_res);
 
             // assert
-            assert_eq!(clear_result, dec_res);
+            assert_eq!(clear_result, dec_res.msg);
         }
     }
 }
@@ -2546,10 +2559,10 @@ where
         let clear_result = clear1.wrapping_neg() % modulus;
 
         // decryption of ct_res
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
         // assert
-        assert_eq!(clear_result, dec_res);
+        assert_eq!(clear_result, dec_res.msg);
     }
 }
 
@@ -2577,10 +2590,10 @@ where
         let ct_res = sks.unchecked_scalar_add(&ct, scalar);
 
         // decryption of ct_res
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
         // assert
-        assert_eq!((clear + scalar) % message_modulus, dec_res as u8);
+        assert_eq!((clear + scalar) % message_modulus, dec_res.msg as u8);
     }
 }
 
@@ -2615,9 +2628,9 @@ where
             clear = (clear + clear_1) % modulus;
 
             // decryption of ct_res
-            let dec_res = cks.decrypt(&ct_res);
+            let dec_res = cks.decrypt_decode_padding(&ct_res);
 
-            assert_eq!(clear, dec_res as u8);
+            assert_eq!(clear, dec_res.msg as u8);
         }
     }
 }
@@ -2647,9 +2660,9 @@ where
 
         let clear = (clear_0 + clear_1) % modulus;
 
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
-        assert_eq!(clear, dec_res as u8);
+        assert_eq!(clear, dec_res.msg as u8);
     }
 }
 
@@ -2677,10 +2690,10 @@ where
         let ct_res = sks.unchecked_scalar_sub(&ct, scalar);
 
         // decryption of ct_res
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
         // assert
-        assert_eq!((clear - scalar) % message_modulus, dec_res as u8);
+        assert_eq!((clear - scalar) % message_modulus, dec_res.msg as u8);
     }
 }
 
@@ -2718,11 +2731,11 @@ where
             clear = (clear - clear_1) % modulus;
 
             // decryption of ct_res
-            let dec_res = cks.decrypt(&ct_res);
+            let dec_res = cks.decrypt_decode_padding(&ct_res);
 
             // println!("clear_1 = {}, dec = {}, clear = {}", clear_1, dec_res, clear);
             // assert
-            assert_eq!(clear, dec_res as u8);
+            assert_eq!(clear, dec_res.msg as u8);
         }
     }
 }
@@ -2751,9 +2764,9 @@ where
 
         let clear = (clear_0.wrapping_sub(clear_1)) % modulus;
 
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
-        assert_eq!(clear, dec_res as u8);
+        assert_eq!(clear, dec_res.msg as u8);
     }
 }
 
@@ -2782,10 +2795,10 @@ where
         let ct_res = sks.unchecked_scalar_mul(&ct, scalar);
 
         // decryption of ct_res
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
         // assert
-        assert_eq!((clear * scalar) % message_modulus, dec_res as u8);
+        assert_eq!((clear * scalar) % message_modulus, dec_res.msg as u8);
     }
 }
 
@@ -2821,10 +2834,10 @@ where
         }
 
         // decryption of ct_res
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
         // assert
-        assert_eq!(clear_res, dec_res as u8);
+        assert_eq!(clear_res, dec_res.msg as u8);
     }
 }
 
@@ -2855,10 +2868,10 @@ where
         let clear_res = (clear * scalar) % modulus;
 
         // decryption of ct_res
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
         // assert
-        assert_eq!(clear_res, dec_res as u8);
+        assert_eq!(clear_res, dec_res.msg as u8);
     }
 }
 
@@ -2885,10 +2898,10 @@ where
         let ct_res = sks.unchecked_scalar_right_shift(&ctxt_0, shift as u8);
 
         // decryption of ct_res
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
         // assert
-        assert_eq!(clear_0 >> shift, dec_res);
+        assert_eq!(clear_0 >> shift, dec_res.msg);
     }
 }
 
@@ -2915,10 +2928,10 @@ where
         let ct_res = sks.scalar_right_shift(&ctxt_0, shift as u8);
 
         // decryption of ct_res
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
         // assert
-        assert_eq!(clear_0 >> shift, dec_res);
+        assert_eq!(clear_0 >> shift, dec_res.msg);
     }
 }
 
@@ -2945,10 +2958,10 @@ where
         let ct_res = sks.unchecked_scalar_left_shift(&ctxt_0, shift as u8);
 
         // decryption of ct_res
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
         // assert
-        assert_eq!((clear_0 << shift) % modulus, dec_res);
+        assert_eq!((clear_0 << shift) % modulus, dec_res.msg);
     }
 }
 
@@ -2975,10 +2988,10 @@ where
         let ct_res = sks.scalar_left_shift(&ctxt_0, shift as u8);
 
         // decryption of ct_res
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
         // assert
-        assert_eq!((clear_0 << shift) % modulus, dec_res);
+        assert_eq!((clear_0 << shift) % modulus, dec_res.msg);
     }
 }
 
@@ -3006,11 +3019,11 @@ where
         let ct_tmp = sks.unchecked_sub(&ctxt_1, &ctxt_2);
 
         // Decrypt the result
-        let dec = cks.decrypt(&ct_tmp);
+        let dec = cks.decrypt_decode_padding(&ct_tmp);
 
         // Check the correctness
         let clear_result = (clear1 - clear2) % modulus;
-        assert_eq!(clear_result, dec % modulus);
+        assert_eq!(clear_result, dec.msg);
     }
 }
 
@@ -3041,10 +3054,10 @@ where
             clear_res = (clear_res - clear2) % modulus;
         }
         // decryption of ct_res
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
         // assert
-        assert_eq!(clear_res, dec_res);
+        assert_eq!(clear_res, dec_res.msg);
     }
 }
 
@@ -3071,10 +3084,10 @@ where
         let clear_res = (clear1.wrapping_sub(clear2)) % modulus;
 
         // decryption of ct_res
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
         // assert
-        assert_eq!(clear_res, dec_res);
+        assert_eq!(clear_res, dec_res.msg);
     }
 }
 
@@ -3105,10 +3118,10 @@ where
         let ct_res = sks.unchecked_mul_lsb_small_carry(&ctxt_zero, &ctxt_one);
 
         // decryption of ct_res
-        let dec_res = cks.decrypt(&ct_res);
+        let dec_res = cks.decrypt_decode_padding(&ct_res);
 
         // assert
-        assert_eq!((clear_0 * clear_1) % modulus, dec_res % modulus);
+        assert_eq!((clear_0 * clear_1) % modulus, dec_res.msg);
     }
 }
 
@@ -3137,14 +3150,16 @@ where
 
         println!("MUL SMALL CARRY:: clear1 = {clear1}, clear2 = {clear2}, mod = {modulus}");
         let ct_res = sks.unchecked_mul_lsb_small_carry(&ct1, &ct2);
-        assert_eq!(
-            (clear1 * clear2) % modulus,
-            cks.decrypt_message_and_carry(&ct_res) % modulus
-        );
+
+        let res = cks.decrypt_decode_padding(&ct_res);
+        assert_eq!(clear1 * clear2, res.carry_and_msg);
 
         println!("ADD:: clear1 = {clear1}, clear2 = {clear2}, mod = {modulus}");
         let ct_res = sks.unchecked_add(&ct1, &ct2);
-        assert_eq!((clear1 + clear2), cks.decrypt_message_and_carry(&ct_res));
+
+        let res = cks.decrypt_decode_padding(&ct_res);
+
+        assert_eq!((clear1 + clear2), res.carry_and_msg);
     }
 }
 
@@ -3185,14 +3200,14 @@ where
         let ct_res = sks.unchecked_mul_lsb_small_carry(&ct1, &ct2);
         assert_eq!(
             (clear1 * clear2) % msg_modulus,
-            cks.decrypt_message_and_carry(&ct_res) % msg_modulus
+            cks.decrypt_decode_padding(&ct_res).msg
         );
 
         println!("ADD:: clear1 = {clear1}, clear2 = {clear2}, msg_mod = {msg_modulus}, carry_mod = {carry_modulus}");
         let ct_res = sks.unchecked_add(&ct1, &ct2);
         assert_eq!(
             (clear1 + clear2) % modulus,
-            cks.decrypt_message_and_carry(&ct_res) % modulus
+            cks.decrypt_decode_padding(&ct_res).msg
         );
     }
 }
@@ -3220,7 +3235,7 @@ where
     sks.smart_mul_lsb_assign(&mut res, &mut ct_control);
     sks.smart_add_assign(&mut res, &mut ct_false);
 
-    let dec_res = cks.decrypt(&res);
+    let dec_res = cks.decrypt_decode_padding(&res).msg;
 
     let clear_mux = (msg_true - msg_false) * control_bit + msg_false;
     println!("(msg_true - msg_false) * control_bit  + msg_false = {clear_mux}, res = {dec_res}");

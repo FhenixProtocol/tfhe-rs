@@ -443,7 +443,7 @@ impl Shortint {
     #[wasm_bindgen]
     pub fn decrypt(client_key: &ShortintClientKey, ct: &ShortintCiphertext) -> u64 {
         set_hook(Box::new(console_error_panic_hook::hook));
-        client_key.0.decrypt(&ct.0)
+        client_key.0.decrypt_decode_padding(&ct.0).msg
     }
 
     #[wasm_bindgen]

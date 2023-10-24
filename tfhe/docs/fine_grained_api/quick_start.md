@@ -125,8 +125,8 @@ fn main() {
     let ct_3 = server_key.unchecked_add(&ct_1, &ct_2);
 
     // We use the client key to decrypt the output of the circuit:
-    let output = client_key.decrypt(&ct_3);
-    assert_eq!(output, (msg1 + msg2) % modulus as u64);
+    let output = client_key.decrypt_decode_padding(&ct_3);
+    assert_eq!(output.msg, (msg1 + msg2) % modulus as u64);
 }
 ```
 

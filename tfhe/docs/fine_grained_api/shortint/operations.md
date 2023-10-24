@@ -72,8 +72,8 @@ fn main() {
     server_key.unchecked_mul_lsb_assign(&mut ct_1, &ct_2);
 
     // We use the client key to decrypt the output of the circuit:
-    let output = client_key.decrypt(&ct_1);
-    println!("expected {}, found {}", ((msg1 * scalar as u64 - msg2) * msg2) % modulus as u64, output);
+    let output = client_key.decrypt_decode_padding(&ct_1);
+    println!("expected {}, found {}", ((msg1 * scalar as u64 - msg2) * msg2) % modulus as u64, output.msg);
 }
 ```
 
@@ -116,8 +116,8 @@ fn main() {
     }
 
     // We use the client key to decrypt the output of the circuit:
-    let output = client_key.decrypt(&ct_1);
-    assert_eq!(output, ((msg1 * scalar as u64 - msg2) * msg2) % modulus as u64);
+    let output = client_key.decrypt_decode_padding(&ct_1);
+    assert_eq!(output.msg, ((msg1 * scalar as u64 - msg2) * msg2) % modulus as u64);
 }
 ```
 
@@ -148,8 +148,8 @@ fn main() {
     server_key.smart_mul_lsb_assign(&mut ct_1, &mut ct_2);
 
     // We use the client key to decrypt the output of the circuit:
-    let output = client_key.decrypt(&ct_1);
-    assert_eq!(output, ((msg1 * scalar as u64 - msg2) * msg2) % modulus as u64);
+    let output = client_key.decrypt_decode_padding(&ct_1);
+    assert_eq!(output.msg, ((msg1 * scalar as u64 - msg2) * msg2) % modulus as u64);
 }
 ```
 
@@ -182,8 +182,8 @@ fn main() {
     server_key.mul_lsb_assign(&mut ct_1, &mut ct_2);
 
     // We use the client key to decrypt the output of the circuit:
-    let output = client_key.decrypt(&ct_1);
-    assert_eq!(output, ((msg1 * scalar as u64 - msg2) * msg2) % modulus as u64);
+    let output = client_key.decrypt_decode_padding(&ct_1);
+    assert_eq!(output.msg, ((msg1 * scalar as u64 - msg2) * msg2) % modulus as u64);
 }
 ```
 
@@ -228,8 +228,8 @@ fn main() {
     // Encryption of one message:
     let ct = pks.encrypt(msg);
     // Decryption:
-    let dec = cks.decrypt(&ct);
-    assert_eq!(dec, msg);
+    let dec = cks.decrypt_decode_padding(&ct);
+    assert_eq!(dec.msg, msg);
 }
 ```
 
@@ -257,8 +257,8 @@ fn main() {
     let ct_3 = server_key.unchecked_add(&ct_1, &ct_2);
 
     // We use the client key to decrypt the output of the circuit:
-    let output = client_key.decrypt(&ct_3);
-    assert_eq!(output, (msg1 + msg2) % modulus as u64);
+    let output = client_key.decrypt_decode_padding(&ct_3);
+    assert_eq!(output.msg, (msg1 + msg2) % modulus as u64);
 }
 ```
 
@@ -288,8 +288,8 @@ fn main() {
     let ct_3 = server_key.unchecked_bitand(&ct_1, &ct_2);
 
     // We use the client key to decrypt the output of the circuit:
-    let output = client_key.decrypt(&ct_3);
-    assert_eq!(output, (msg1 & msg2) % modulus as u64);
+    let output = client_key.decrypt_decode_padding(&ct_3);
+    assert_eq!(output.msg, (msg1 & msg2) % modulus as u64);
 }
 ```
 
@@ -319,8 +319,8 @@ fn main() {
     let ct_3 = server_key.unchecked_greater_or_equal(&ct_1, &ct_2);
 
     // We use the client key to decrypt the output of the circuit:
-    let output = client_key.decrypt(&ct_3);
-    assert_eq!(output, (msg1 >= msg2) as u64 % modulus as u64);
+    let output = client_key.decrypt_decode_padding(&ct_3);
+    assert_eq!(output.msg, (msg1 >= msg2) as u64 % modulus as u64);
 }
 ```
 
@@ -349,8 +349,8 @@ fn main() {
 
 
     // We use the client key to decrypt the output of the circuit:
-    let output = client_key.decrypt(&ct_res);
-    assert_eq!(output, msg1.count_ones() as u64);
+    let output = client_key.decrypt_decode_padding(&ct_res);
+    assert_eq!(output.msg, msg1.count_ones() as u64);
 }
 ```
 
@@ -383,7 +383,7 @@ fn main() {
     let ct_res = server_key.smart_apply_lookup_table_bivariate(&mut ct_1, &mut ct_2, &acc);
 
     // We use the client key to decrypt the output of the circuit:
-    let output = client_key.decrypt(&ct_res);
-    assert_eq!(output, (msg1.count_ones() as u64 + msg2.count_ones() as u64) % modulus);
+    let output = client_key.decrypt_decode_padding(&ct_res);
+    assert_eq!(output.msg, (msg1.count_ones() as u64 + msg2.count_ones() as u64) % modulus);
 }
 ```

@@ -449,7 +449,7 @@ impl ServerKey {
     /// // |  0 1  |   0 0   |
     ///
     /// // Decrypt:
-    /// let msg_and_carry = cks.decrypt_message_and_carry(&ct_res);
+    /// let msg_and_carry = cks.decrypt_radix(&ct_res);
     /// let msg_only = cks.decrypt(&ct_res);
     /// let modulus = cks.parameters.message_modulus().0 as u64;
     ///
@@ -474,7 +474,7 @@ impl ServerKey {
     /// // |  0 1  |   0 0   |
     ///
     /// // Decrypt:
-    /// let msg_and_carry = cks.decrypt_message_and_carry(&ct_res);
+    /// let msg_and_carry = cks.decrypt_radix(&ct_res);
     /// let msg_only = cks.decrypt(&ct_res);
     /// let modulus = cks.parameters.message_modulus().0 as u64;
     ///
@@ -516,7 +516,7 @@ impl ServerKey {
     /// // |  0 1  |   0 0   |
     ///
     /// // Decrypt:
-    /// let msg_and_carry = cks.decrypt_message_and_carry(&ct);
+    /// let msg_and_carry = cks.decrypt_radix(&ct);
     /// let msg_only = cks.decrypt(&ct);
     /// let modulus = cks.parameters.message_modulus().0 as u64;
     ///
@@ -541,7 +541,7 @@ impl ServerKey {
     /// // |  0 1  |   0 0   |
     ///
     /// // Decrypt:
-    /// let msg_and_carry = cks.decrypt_message_and_carry(&ct);
+    /// let msg_and_carry = cks.decrypt_radix(&ct);
     /// let msg_only = cks.decrypt(&ct);
     /// let modulus = cks.parameters.message_modulus().0 as u64;
     ///
@@ -635,7 +635,7 @@ impl ServerKey {
     /// // |  1 0  |   0 0   |
     ///
     /// // Decrypt:
-    /// let msg_and_carry = cks.decrypt_message_and_carry(&ct_res);
+    /// let msg_and_carry = cks.decrypt_radix(&ct_res);
     /// let msg_only = cks.decrypt(&ct_res);
     /// let modulus = cks.parameters.message_modulus().0 as u64;
     ///
@@ -666,7 +666,7 @@ impl ServerKey {
     /// // |  1 0  |   0 0   |
     ///
     /// // Decrypt:
-    /// let msg_and_carry = cks.decrypt_message_and_carry(&ct_res);
+    /// let msg_and_carry = cks.decrypt_radix(&ct_res);
     /// let msg_only = cks.decrypt(&ct_res);
     /// let modulus = cks.parameters.message_modulus().0 as u64;
     ///
@@ -730,7 +730,7 @@ impl ServerKey {
     /// // |  0 1  |   0 0   |
     ///
     /// // Decrypt:
-    /// let msg_and_carry = cks.decrypt_message_and_carry(&ct_res);
+    /// let msg_and_carry = cks.decrypt_radix(&ct_res);
     /// let msg_only = cks.decrypt(&ct_res);
     /// let modulus = cks.parameters.message_modulus().0 as u64;
     ///
@@ -754,7 +754,7 @@ impl ServerKey {
     /// // |  0 1  |   0 0   |
     ///
     /// // Decrypt:
-    /// let msg_and_carry = cks.decrypt_message_and_carry(&ct_res);
+    /// let msg_and_carry = cks.decrypt_radix(&ct_res);
     /// let msg_only = cks.decrypt(&ct_res);
     /// let modulus = cks.parameters.message_modulus().0 as u64;
     ///

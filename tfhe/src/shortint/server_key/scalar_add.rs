@@ -452,7 +452,7 @@ impl ServerKey {
     /// sks.smart_scalar_add_assign(&mut ct, scalar);
     ///
     /// // Our result is what we expect
-    /// let clear = cks.decrypt_message_and_carry(&ct);
+    /// let clear = cks.decrypt_radix(&ct);
     /// assert_eq!(6, clear);
     ///
     /// let (cks, sks) = gen_keys(PARAM_MESSAGE_2_CARRY_2_PBS_KS);
@@ -464,7 +464,7 @@ impl ServerKey {
     /// sks.smart_scalar_add_assign(&mut ct, scalar);
     ///
     /// // Our result is what we expect
-    /// let clear = cks.decrypt_message_and_carry(&ct);
+    /// let clear = cks.decrypt_radix(&ct);
     /// assert_eq!(6, clear);
     /// ```
     pub fn smart_scalar_add_assign(&self, ct: &mut Ciphertext, scalar: u8) {

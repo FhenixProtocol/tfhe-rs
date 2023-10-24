@@ -138,15 +138,15 @@ fn shortint_compact_public_key_base_smart_add(params: ClassicPBSParameters) {
 
         let ctxt_1 = pk.encrypt(clear_1);
 
-        let d = cks.decrypt(&ctxt_0);
-        assert_eq!(d, clear_0);
-        let d = cks.decrypt(&ctxt_1);
-        assert_eq!(d, clear_1);
+        let d = cks.decrypt_decode_padding(&ctxt_0);
+        assert_eq!(d.msg, clear_0);
+        let d = cks.decrypt_decode_padding(&ctxt_1);
+        assert_eq!(d.msg, clear_1);
 
         let mut ct_res = sks.unchecked_add(&ctxt_0, &ctxt_1);
         let mut clear = clear_0 + clear_1;
-        let d = cks.decrypt(&ct_res);
-        assert_eq!(d, clear % modulus);
+        let d = cks.decrypt_decode_padding(&ct_res);
+        assert_eq!(d.msg, clear % modulus);
 
         //add multiple times to raise the degree and test the smart operation
         for _ in 0..NB_SUB_TEST {
@@ -154,10 +154,10 @@ fn shortint_compact_public_key_base_smart_add(params: ClassicPBSParameters) {
             clear += clear_0;
 
             // decryption of ct_res
-            let dec_res = cks.decrypt(&ct_res);
+            let dec_res = cks.decrypt_decode_padding(&ct_res);
 
             // assert
-            assert_eq!(clear % modulus, dec_res);
+            assert_eq!(clear % modulus, dec_res.msg);
         }
     }
 }
@@ -198,11 +198,11 @@ fn shortint_compact_public_key_base_list_smart_sub(params: ClassicPBSParameters)
 
         // decryption check
         for i in 0..num_ct_for_this_iter {
-            let decrypted_0 = cks.decrypt(&first_expanded_vec[i]);
-            let decrypted_1 = cks.decrypt(&second_expanded_vec[i]);
+            let decrypted_0 = cks.decrypt_decode_padding(&first_expanded_vec[i]);
+            let decrypted_1 = cks.decrypt_decode_padding(&second_expanded_vec[i]);
 
-            assert_eq!(decrypted_0, first_clear_vec[i]);
-            assert_eq!(decrypted_1, second_clear_vec[i]);
+            assert_eq!(decrypted_0.msg, first_clear_vec[i]);
+            assert_eq!(decrypted_1.msg, second_clear_vec[i]);
         }
 
         for _ in 0..NB_SUB_TEST {
@@ -210,11 +210,11 @@ fn shortint_compact_public_key_base_list_smart_sub(params: ClassicPBSParameters)
                 sks.smart_sub_assign(&mut first_expanded_vec[i], &mut second_expanded_vec[i]);
                 first_clear_vec[i] = first_clear_vec[i].wrapping_sub(second_clear_vec[i]);
 
-                let decrypted_0 = cks.decrypt(&first_expanded_vec[i]);
-                let decrypted_1 = cks.decrypt(&second_expanded_vec[i]);
+                let decrypted_0 = cks.decrypt_decode_padding(&first_expanded_vec[i]);
+                let decrypted_1 = cks.decrypt_decode_padding(&second_expanded_vec[i]);
 
-                assert_eq!(decrypted_0, first_clear_vec[i] % modulus);
-                assert_eq!(decrypted_1, second_clear_vec[i] % modulus);
+                assert_eq!(decrypted_0.msg, first_clear_vec[i] % modulus);
+                assert_eq!(decrypted_1.msg, second_clear_vec[i] % modulus);
             }
         }
     }

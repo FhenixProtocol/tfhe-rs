@@ -361,7 +361,7 @@ impl WopbsKey {
     /// let ct = cks.encrypt(rng.gen::<u64>() % message_modulus as u64);
     /// let lut = vec![(1_u64 << 59); wopbs_key.param.polynomial_size.0].into();
     /// let ct_res = wopbs_key.programmable_bootstrapping(&sks, &ct, &lut);
-    /// let res = cks.decrypt_message_and_carry(&ct_res);
+    /// let res = cks.decrypt_radix(&ct_res);
     /// assert_eq!(res, 1);
     /// ```
     pub fn programmable_bootstrapping(
@@ -398,7 +398,7 @@ impl WopbsKey {
     /// let ct = cks.encrypt(rng.gen::<u64>() % message_modulus as u64);
     /// let lut = vec![(1_u64 << 59); wopbs_key.param.polynomial_size.0].into();
     /// let ct_res = wopbs_key.wopbs(&ct, &lut);
-    /// let res = cks.decrypt_message_and_carry(&ct_res);
+    /// let res = cks.decrypt_radix(&ct_res);
     /// assert_eq!(res, 1);
     /// ```
     pub fn wopbs(&self, ct_in: &Ciphertext, lut: &ShortintWopbsLUT) -> Ciphertext {
@@ -423,7 +423,7 @@ impl WopbsKey {
     /// let ct = cks.encrypt_without_padding(rng.gen::<u64>() % 2);
     /// let lut = vec![(1_u64 << 63); wopbs_key.param.polynomial_size.0].into();
     /// let ct_res = wopbs_key.programmable_bootstrapping_without_padding(&ct, &lut);
-    /// let res = cks.decrypt_message_and_carry_without_padding(&ct_res);
+    /// let res = cks.decrypt_radix_without_padding(&ct_res);
     /// assert_eq!(res, 1);
     /// ```
     pub fn programmable_bootstrapping_without_padding(

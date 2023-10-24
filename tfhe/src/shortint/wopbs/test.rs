@@ -116,8 +116,8 @@ fn generate_lut(params: (ClassicPBSParameters, WopbsParameters)) {
         let lut = wopbs_key.generate_lut(&ct, |x| x % message_modulus as u64);
         let ct_res = wopbs_key.programmable_bootstrapping(sks, &ct, &lut);
 
-        let res = cks.decrypt(&ct_res);
-        if res != (m % message_modulus) as u64 {
+        let res = cks.decrypt_decode_padding(&ct_res);
+        if res.msg != (m % message_modulus) as u64 {
             tmp += 1;
         }
     }
@@ -145,8 +145,8 @@ fn generate_lut_modulus(params: (ClassicPBSParameters, WopbsParameters)) {
         let ct_res = wopbs_key.wopbs(&ct, &lut);
         let ct_res = wopbs_key.keyswitch_to_pbs_params(&ct_res);
 
-        let res = cks.decrypt(&ct_res);
-        assert_eq!(res as usize, (m * m) % message_modulus.0);
+        let res = cks.decrypt_decode_padding(&ct_res);
+        assert_eq!(res.msg as usize, (m * m) % message_modulus.0);
     }
 }
 

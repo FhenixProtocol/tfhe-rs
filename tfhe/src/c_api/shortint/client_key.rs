@@ -88,7 +88,7 @@ pub unsafe extern "C" fn shortint_client_key_decrypt(
         let ciphertext_to_decrypt = get_ref_checked(ciphertext_to_decrypt).unwrap();
         let inner_ct = &ciphertext_to_decrypt.0;
 
-        *result = client_key.0.decrypt(inner_ct);
+        *result = client_key.0.decrypt_decode_padding(inner_ct).msg;
     })
 }
 

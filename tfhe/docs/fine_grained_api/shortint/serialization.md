@@ -41,8 +41,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let serialized_result = server_function(&serialized_data)?;
     let result: Ciphertext = bincode::deserialize(&serialized_result)?;
 
-    let output = client_key.decrypt(&result);
-    assert_eq!(output, msg1 + msg2);
+    let output = client_key.decrypt_decode_padding(&result);
+    assert_eq!(output.msg, msg1 + msg2);
     Ok(())
 }
 

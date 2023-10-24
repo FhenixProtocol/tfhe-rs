@@ -12,6 +12,7 @@ use crate::integer::block_decomposition::BlockRecomposer;
 use crate::integer::ciphertext::{CompressedCrtCiphertext, CrtCiphertext};
 use crate::integer::client_key::utils::i_crt;
 use crate::integer::encryption::{encrypt_crt, encrypt_words_radix_impl};
+use crate::shortint::engine::DecodedWithPadding;
 use crate::shortint::parameters::MessageModulus;
 use crate::shortint::{
     Ciphertext, ClientKey as ShortintClientKey, ShortintParameterSet as ShortintParameters,
@@ -236,7 +237,7 @@ impl ClientKey {
     {
         self.decrypt_radix_impl(
             &ctxt.blocks,
-            crate::shortint::ClientKey::decrypt_message_and_carry,
+            crate::shortint::ClientKey::decrypt_decode_padding,
         )
     }
 
@@ -266,7 +267,7 @@ impl ClientKey {
     {
         self.decrypt_radix_impl(
             &ctxt.blocks,
-            crate::shortint::ClientKey::decrypt_message_and_carry_without_padding,
+            crate::shortint::ClientKey::decrypt_decode_padding,
         )
     }
 
@@ -280,7 +281,7 @@ impl ClientKey {
     ) -> T
     where
         T: RecomposableFrom<u64>,
-        F: Fn(&crate::shortint::ClientKey, &crate::shortint::Ciphertext) -> u64,
+        F: Fn(&crate::shortint::ClientKey, &crate::shortint::Ciphertext) -> DecodedWithPadding,
     {
         if blocks.is_empty() {
             return T::ZERO;
@@ -291,7 +292,7 @@ impl ClientKey {
 
         for encrypted_block in blocks {
             let decrypted_block = decrypt_block(&self.key, encrypted_block);
-            if !recomposer.add_unmasked(decrypted_block) {
+            if !recomposer.add_unmasked(decrypted_block.carry_and_msg) {
                 // End of T::BITS reached no need to try more
                 // recomposition
                 break;
@@ -361,7 +362,7 @@ impl ClientKey {
     where
         T: RecomposableSignedInteger,
     {
-        self.decrypt_signed_radix_impl(ctxt, crate::shortint::ClientKey::decrypt_message_and_carry)
+        self.decrypt_signed_radix_impl(ctxt, crate::shortint::ClientKey::decrypt_decode_padding)
     }
 
     pub fn decrypt_signed_radix_impl<T, F>(
@@ -371,7 +372,7 @@ impl ClientKey {
     ) -> T
     where
         T: RecomposableSignedInteger,
-        F: Fn(&crate::shortint::ClientKey, &crate::shortint::Ciphertext) -> u64,
+        F: Fn(&crate::shortint::ClientKey, &crate::shortint::Ciphertext) -> DecodedWithPadding,
     {
         let message_modulus = self.parameters().message_modulus().0;
         assert!(message_modulus.is_power_of_two());
@@ -429,7 +430,7 @@ impl ClientKey {
     ///
     /// This takes a shortint ciphertext as input.
     pub fn decrypt_one_block(&self, ct: &Ciphertext) -> u64 {
-        self.key.decrypt(ct)
+        self.key.decrypt_decode_padding(ct).msg
     }
 
     /// Encrypts an integer using crt representation
@@ -499,7 +500,7 @@ impl ClientKey {
         // Decrypting each block individually
         for (c_i, b_i) in ctxt.blocks.iter().zip(ctxt.moduli.iter()) {
             // decrypt the component i of the integer and multiply it by the radix product
-            val.push(self.key.decrypt_message_and_carry(c_i) % b_i);
+            val.push(self.key.decrypt_decode_padding(c_i).carry_and_msg % b_i);
         }
 
         // Computing the inverse CRT to recompose the message

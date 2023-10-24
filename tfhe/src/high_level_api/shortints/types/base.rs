@@ -520,7 +520,9 @@ where
     #[track_caller]
     fn decrypt(&self, key: &ClientKey) -> u8 {
         let key = self.id.unwrapped_ref_key(key);
-        key.key.decrypt(&self.ciphertext.borrow()) as u8
+        key.key
+            .decrypt_decode_padding(&self.ciphertext.borrow())
+            .msg as u8
     }
 }
 

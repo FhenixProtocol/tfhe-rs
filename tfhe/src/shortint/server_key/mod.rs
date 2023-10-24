@@ -669,7 +669,7 @@ impl ServerKey {
     /// // |  0 0  |   1 0   |
     ///
     /// // Decrypt:
-    /// let res = cks.decrypt_message_and_carry(&ct);
+    /// let res = cks.decrypt_radix(&ct);
     /// assert_eq!(2, res);
     /// ```
     pub fn carry_extract_assign(&self, ct: &mut Ciphertext) {

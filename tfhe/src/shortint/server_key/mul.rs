@@ -269,7 +269,7 @@ impl ServerKey {
     /// assert!(ct_res.is_ok());
     ///
     /// let ct_res = ct_res.unwrap();
-    /// let clear_res = cks.decrypt_message_and_carry(&ct_res);
+    /// let clear_res = cks.decrypt_radix(&ct_res);
     /// let modulus = cks.parameters.message_modulus().0 as u64;
     /// assert_eq!(clear_res % modulus, 2);
     ///
@@ -285,7 +285,7 @@ impl ServerKey {
     /// assert!(ct_res.is_ok());
     ///
     /// let ct_res = ct_res.unwrap();
-    /// let clear_res = cks.decrypt_message_and_carry(&ct_res);
+    /// let clear_res = cks.decrypt_radix(&ct_res);
     /// let modulus = cks.parameters.message_modulus().0 as u64;
     /// assert_eq!(clear_res % modulus, 2);
     /// ```
@@ -331,7 +331,7 @@ impl ServerKey {
     ///
     /// assert!(ct_res.is_ok());
     ///
-    /// let clear_res = cks.decrypt_message_and_carry(&ct_1);
+    /// let clear_res = cks.decrypt_radix(&ct_1);
     /// let modulus = cks.parameters.message_modulus().0 as u64;
     /// assert_eq!(clear_res % modulus, 2);
     ///
@@ -346,7 +346,7 @@ impl ServerKey {
     ///
     /// assert!(ct_res.is_ok());
     ///
-    /// let clear_res = cks.decrypt_message_and_carry(&ct_1);
+    /// let clear_res = cks.decrypt_radix(&ct_1);
     /// let modulus = cks.parameters.message_modulus().0 as u64;
     /// assert_eq!(clear_res % modulus, 2);
     /// ```
