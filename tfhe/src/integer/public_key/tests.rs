@@ -1,6 +1,6 @@
 use rand::Rng;
 
-use crate::integer::{gen_keys, CompressedPublicKey, PublicKey};
+use crate::integer::{gen_keys, CompressedPublicKey, PublicKey, RadixCiphertext};
 use crate::shortint::parameters::*;
 use crate::shortint::ClassicPBSParameters;
 
@@ -97,7 +97,7 @@ fn radix_encrypt_decrypt_compact_128_bits_list(params: ClassicPBSParameters) {
 
         let compact_encrypted_list = pk.encrypt_slice_radix_compact(&clear_vec, num_block);
 
-        let ciphertext_vec = compact_encrypted_list.expand();
+        let ciphertext_vec: Vec<RadixCiphertext> = compact_encrypted_list.expand();
 
         for (ciphertext, clear) in ciphertext_vec.iter().zip(clear_vec.iter().copied()) {
             let decrypted: u128 = cks.decrypt_radix(ciphertext);

@@ -7,6 +7,7 @@ use crate::integer::server_key::comparator::{Comparator, ZeroComparisonType};
 use crate::shortint::server_key::LookupTableOwned;
 use crate::shortint::Ciphertext;
 
+use crate::integer::ciphertext::boolean_value::BooleanBlock;
 use rayon::prelude::*;
 
 impl ServerKey {
@@ -358,10 +359,10 @@ impl ServerKey {
     /// let ct_res = sks.unchecked_scalar_eq_parallelized(&ct1, msg2);
     ///
     /// // Decrypt:
-    /// let dec_result: u64 = cks.decrypt(&ct_res);
-    /// assert_eq!(dec_result, u64::from(msg1 == msg2));
+    /// let dec_result = cks.decrypt_bool(&ct_res);
+    /// assert_eq!(dec_result, msg1 == msg2);
     /// ```
-    pub fn unchecked_scalar_eq_parallelized<T, Scalar>(&self, lhs: &T, rhs: Scalar) -> T
+    pub fn unchecked_scalar_eq_parallelized<T, Scalar>(&self, lhs: &T, rhs: Scalar) -> BooleanBlock
     where
         T: IntegerRadixCiphertext,
         Scalar: DecomposableInto<u64>,
@@ -372,7 +373,7 @@ impl ServerKey {
             match self.is_scalar_out_of_bounds(lhs, rhs) {
                 Some(std::cmp::Ordering::Greater) | Some(std::cmp::Ordering::Less) => {
                     // Scalar is not within bounds so it cannot be equal
-                    return self.create_trivial_radix(0, lhs.blocks().len());
+                    return BooleanBlock::new_unchecked(self.key.create_trivial(0));
                 }
                 Some(std::cmp::Ordering::Equal) => {
                     unreachable!("Internal error: is_scalar_out_of_bounds returned Ordering::Equal")
@@ -386,7 +387,7 @@ impl ServerKey {
 
         // Starting From here, we know lhs (T) is an unsigned ciphertext
         if rhs < Scalar::ZERO {
-            return self.create_trivial_radix(0, lhs.blocks().len());
+            return BooleanBlock::new_unchecked(self.key.create_trivial(0));
         }
 
         let message_modulus = self.key.message_modulus.0;
@@ -414,7 +415,7 @@ impl ServerKey {
             .map(|sub_slice| sub_slice.iter().any(|&scalar_block| scalar_block != 0))
             .unwrap_or(false);
         if is_scalar_obviously_bigger {
-            return self.create_trivial_zero_radix(num_blocks);
+            return BooleanBlock::new_unchecked(self.key.create_trivial(0));
         }
         // If we are sill here, that means scalar_blocks above
         // num_blocks_halved are 0s, we can remove them
@@ -455,15 +456,10 @@ impl ServerKey {
         );
         cmp_1.append(&mut cmp_2);
         let is_equal_result = self.are_all_comparisons_block_true(cmp_1);
-
-        let mut blocks = Vec::with_capacity(lhs.blocks().len());
-        blocks.push(is_equal_result);
-        blocks.resize_with(lhs.blocks().len(), || self.key.create_trivial(0));
-
-        T::from_blocks(blocks)
+        BooleanBlock::new_unchecked(is_equal_result)
     }
 
-    pub fn unchecked_scalar_ne_parallelized<T, Scalar>(&self, lhs: &T, rhs: Scalar) -> T
+    pub fn unchecked_scalar_ne_parallelized<T, Scalar>(&self, lhs: &T, rhs: Scalar) -> BooleanBlock
     where
         T: IntegerRadixCiphertext,
         Scalar: DecomposableInto<u64>,
@@ -474,7 +470,7 @@ impl ServerKey {
             match self.is_scalar_out_of_bounds(lhs, rhs) {
                 Some(std::cmp::Ordering::Greater) | Some(std::cmp::Ordering::Less) => {
                     // Scalar is not within bounds so its not equal
-                    return self.create_trivial_radix(1, lhs.blocks().len());
+                    return BooleanBlock::new_unchecked(self.key.create_trivial(1));
                 }
                 Some(std::cmp::Ordering::Equal) => unreachable!("Internal error: invalid value"),
                 None => {
@@ -485,7 +481,7 @@ impl ServerKey {
         }
 
         if rhs < Scalar::ZERO {
-            return self.create_trivial_radix(1, lhs.blocks().len());
+            return BooleanBlock::new_unchecked(self.key.create_trivial(1));
         }
 
         let message_modulus = self.key.message_modulus.0;
@@ -513,7 +509,7 @@ impl ServerKey {
             .map(|sub_slice| sub_slice.iter().any(|&scalar_block| scalar_block != 0))
             .unwrap_or(false);
         if is_scalar_obviously_bigger {
-            return self.create_trivial_radix(1, num_blocks);
+            return BooleanBlock::new_unchecked(self.key.create_trivial(1));
         }
         // If we are sill here, that means scalar_blocks above
         // num_blocks_halved are 0s, we can remove them
@@ -559,15 +555,10 @@ impl ServerKey {
         );
         cmp_1.append(&mut cmp_2);
         let is_equal_result = self.is_at_least_one_comparisons_block_true(cmp_1);
-
-        let mut blocks = Vec::with_capacity(lhs.blocks().len());
-        blocks.push(is_equal_result);
-        blocks.resize_with(lhs.blocks().len(), || self.key.create_trivial(0));
-
-        T::from_blocks(blocks)
+        BooleanBlock::new_unchecked(is_equal_result)
     }
 
-    pub fn smart_scalar_eq_parallelized<T, Scalar>(&self, lhs: &mut T, rhs: Scalar) -> T
+    pub fn smart_scalar_eq_parallelized<T, Scalar>(&self, lhs: &mut T, rhs: Scalar) -> BooleanBlock
     where
         T: IntegerRadixCiphertext,
         Scalar: DecomposableInto<u64>,
@@ -578,7 +569,7 @@ impl ServerKey {
         self.unchecked_scalar_eq_parallelized(lhs, rhs)
     }
 
-    pub fn scalar_eq_parallelized<T, Scalar>(&self, lhs: &T, rhs: Scalar) -> T
+    pub fn scalar_eq_parallelized<T, Scalar>(&self, lhs: &T, rhs: Scalar) -> BooleanBlock
     where
         T: IntegerRadixCiphertext,
         Scalar: DecomposableInto<u64>,
@@ -594,7 +585,7 @@ impl ServerKey {
         self.unchecked_scalar_eq_parallelized(lhs, rhs)
     }
 
-    pub fn smart_scalar_ne_parallelized<T, Scalar>(&self, lhs: &mut T, rhs: Scalar) -> T
+    pub fn smart_scalar_ne_parallelized<T, Scalar>(&self, lhs: &mut T, rhs: Scalar) -> BooleanBlock
     where
         T: IntegerRadixCiphertext,
         Scalar: DecomposableInto<u64>,
@@ -605,7 +596,7 @@ impl ServerKey {
         self.unchecked_scalar_ne_parallelized(lhs, rhs)
     }
 
-    pub fn scalar_ne_parallelized<T, Scalar>(&self, lhs: &T, rhs: Scalar) -> T
+    pub fn scalar_ne_parallelized<T, Scalar>(&self, lhs: &T, rhs: Scalar) -> BooleanBlock
     where
         T: IntegerRadixCiphertext,
         Scalar: DecomposableInto<u64>,
@@ -625,7 +616,7 @@ impl ServerKey {
     // Unchecked <, >, <=, >=, min, max
     //===========================================================
 
-    pub fn unchecked_scalar_gt_parallelized<T, Scalar>(&self, lhs: &T, rhs: Scalar) -> T
+    pub fn unchecked_scalar_gt_parallelized<T, Scalar>(&self, lhs: &T, rhs: Scalar) -> BooleanBlock
     where
         T: IntegerRadixCiphertext,
         Scalar: DecomposableInto<u64>,
@@ -633,7 +624,7 @@ impl ServerKey {
         Comparator::new(self).unchecked_scalar_gt_parallelized(lhs, rhs)
     }
 
-    pub fn unchecked_scalar_ge_parallelized<T, Scalar>(&self, lhs: &T, rhs: Scalar) -> T
+    pub fn unchecked_scalar_ge_parallelized<T, Scalar>(&self, lhs: &T, rhs: Scalar) -> BooleanBlock
     where
         T: IntegerRadixCiphertext,
         Scalar: DecomposableInto<u64>,
@@ -641,7 +632,7 @@ impl ServerKey {
         Comparator::new(self).unchecked_scalar_ge_parallelized(lhs, rhs)
     }
 
-    pub fn unchecked_scalar_lt_parallelized<T, Scalar>(&self, lhs: &T, rhs: Scalar) -> T
+    pub fn unchecked_scalar_lt_parallelized<T, Scalar>(&self, lhs: &T, rhs: Scalar) -> BooleanBlock
     where
         T: IntegerRadixCiphertext,
         Scalar: DecomposableInto<u64>,
@@ -649,7 +640,7 @@ impl ServerKey {
         Comparator::new(self).unchecked_scalar_lt_parallelized(lhs, rhs)
     }
 
-    pub fn unchecked_scalar_le_parallelized<T, Scalar>(&self, lhs: &T, rhs: Scalar) -> T
+    pub fn unchecked_scalar_le_parallelized<T, Scalar>(&self, lhs: &T, rhs: Scalar) -> BooleanBlock
     where
         T: IntegerRadixCiphertext,
         Scalar: DecomposableInto<u64>,
@@ -677,7 +668,7 @@ impl ServerKey {
     // Smart <, >, <=, >=, min, max
     //===========================================================
 
-    pub fn smart_scalar_gt_parallelized<T, Scalar>(&self, lhs: &mut T, rhs: Scalar) -> T
+    pub fn smart_scalar_gt_parallelized<T, Scalar>(&self, lhs: &mut T, rhs: Scalar) -> BooleanBlock
     where
         T: IntegerRadixCiphertext,
         Scalar: DecomposableInto<u64>,
@@ -685,7 +676,7 @@ impl ServerKey {
         Comparator::new(self).smart_scalar_gt_parallelized(lhs, rhs)
     }
 
-    pub fn smart_scalar_ge_parallelized<T, Scalar>(&self, lhs: &mut T, rhs: Scalar) -> T
+    pub fn smart_scalar_ge_parallelized<T, Scalar>(&self, lhs: &mut T, rhs: Scalar) -> BooleanBlock
     where
         T: IntegerRadixCiphertext,
         Scalar: DecomposableInto<u64>,
@@ -693,7 +684,7 @@ impl ServerKey {
         Comparator::new(self).smart_scalar_ge_parallelized(lhs, rhs)
     }
 
-    pub fn smart_scalar_lt_parallelized<T, Scalar>(&self, lhs: &mut T, rhs: Scalar) -> T
+    pub fn smart_scalar_lt_parallelized<T, Scalar>(&self, lhs: &mut T, rhs: Scalar) -> BooleanBlock
     where
         T: IntegerRadixCiphertext,
         Scalar: DecomposableInto<u64>,
@@ -701,7 +692,7 @@ impl ServerKey {
         Comparator::new(self).smart_scalar_lt_parallelized(lhs, rhs)
     }
 
-    pub fn smart_scalar_le_parallelized<T, Scalar>(&self, lhs: &mut T, rhs: Scalar) -> T
+    pub fn smart_scalar_le_parallelized<T, Scalar>(&self, lhs: &mut T, rhs: Scalar) -> BooleanBlock
     where
         T: IntegerRadixCiphertext,
         Scalar: DecomposableInto<u64>,
@@ -729,7 +720,7 @@ impl ServerKey {
     // Default <, >, <=, >=, min, max
     //===========================================================
 
-    pub fn scalar_gt_parallelized<T, Scalar>(&self, lhs: &T, rhs: Scalar) -> T
+    pub fn scalar_gt_parallelized<T, Scalar>(&self, lhs: &T, rhs: Scalar) -> BooleanBlock
     where
         T: IntegerRadixCiphertext,
         Scalar: DecomposableInto<u64>,
@@ -737,7 +728,7 @@ impl ServerKey {
         Comparator::new(self).scalar_gt_parallelized(lhs, rhs)
     }
 
-    pub fn scalar_ge_parallelized<T, Scalar>(&self, lhs: &T, rhs: Scalar) -> T
+    pub fn scalar_ge_parallelized<T, Scalar>(&self, lhs: &T, rhs: Scalar) -> BooleanBlock
     where
         T: IntegerRadixCiphertext,
         Scalar: DecomposableInto<u64>,
@@ -745,7 +736,7 @@ impl ServerKey {
         Comparator::new(self).scalar_ge_parallelized(lhs, rhs)
     }
 
-    pub fn scalar_lt_parallelized<T, Scalar>(&self, lhs: &T, rhs: Scalar) -> T
+    pub fn scalar_lt_parallelized<T, Scalar>(&self, lhs: &T, rhs: Scalar) -> BooleanBlock
     where
         T: IntegerRadixCiphertext,
         Scalar: DecomposableInto<u64>,
@@ -753,7 +744,7 @@ impl ServerKey {
         Comparator::new(self).scalar_lt_parallelized(lhs, rhs)
     }
 
-    pub fn scalar_le_parallelized<T, Scalar>(&self, lhs: &T, rhs: Scalar) -> T
+    pub fn scalar_le_parallelized<T, Scalar>(&self, lhs: &T, rhs: Scalar) -> BooleanBlock
     where
         T: IntegerRadixCiphertext,
         Scalar: DecomposableInto<u64>,

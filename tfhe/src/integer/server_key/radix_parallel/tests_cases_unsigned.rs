@@ -1,4 +1,5 @@
 use crate::integer::block_decomposition::BlockDecomposer;
+use crate::integer::ciphertext::boolean_value::BooleanBlock;
 use crate::integer::keycache::KEY_CACHE;
 use crate::integer::{IntegerRadixCiphertext, RadixCiphertext, RadixClientKey, ServerKey};
 use crate::shortint::parameters::*;
@@ -1441,7 +1442,7 @@ where
     P: Into<PBSParameters>,
     T: for<'a> FunctionExecutor<
         (
-            &'a mut RadixCiphertext,
+            &'a mut BooleanBlock,
             &'a mut RadixCiphertext,
             &'a mut RadixCiphertext,
         ),
@@ -1469,7 +1470,6 @@ where
         // (when looking at the degree) it encrypts a boolean value.
         // So we 'force' having a boolean encrypting ciphertext by using eq (==)
         let mut ctxt_condition = sks.scalar_eq_parallelized(&cks.encrypt(clear_condition), 1);
-        assert!(ctxt_condition.holds_boolean_value());
 
         let ct_res = executor.execute((&mut ctxt_condition, &mut ctxt_0, &mut ctxt_1));
 
@@ -2306,11 +2306,7 @@ pub(crate) fn default_if_then_else_test<P, T>(param: P, mut executor: T)
 where
     P: Into<PBSParameters>,
     T: for<'a> FunctionExecutor<
-        (
-            &'a RadixCiphertext,
-            &'a RadixCiphertext,
-            &'a RadixCiphertext,
-        ),
+        (&'a BooleanBlock, &'a RadixCiphertext, &'a RadixCiphertext),
         RadixCiphertext,
     >,
 {
@@ -2337,7 +2333,6 @@ where
         // (when looking at the degree) it encrypts a boolean value.
         // So we 'force' having a boolean encrypting ciphertext by using eq (==)
         let ctxt_condition = sks.scalar_eq_parallelized(&cks.encrypt(clear_condition), 1);
-        assert!(ctxt_condition.holds_boolean_value());
 
         let ct_res = executor.execute((&ctxt_condition, &ctxt_0, &ctxt_1));
         assert!(ct_res.block_carries_are_empty());
@@ -2386,8 +2381,7 @@ where
     let two = sks.create_trivial_radix(2, NB_CTXT);
     {
         // Condition is false
-        let condition: RadixCiphertext = sks.create_trivial_zero_radix(NB_CTXT);
-        assert!(condition.blocks.iter().all(|b| b.degree.0 == 0));
+        let condition = sks.create_trivial_boolean_block(false);
 
         let result = executor.execute((&condition, &one, &two));
         assert!(result.block_carries_are_empty());
@@ -2407,7 +2401,7 @@ where
     }
     {
         // Condition is true
-        let condition: RadixCiphertext = sks.create_trivial_radix(1, NB_CTXT);
+        let condition = sks.create_trivial_boolean_block(true);
 
         let result = executor.execute((&condition, &one, &two));
         assert!(result.block_carries_are_empty());

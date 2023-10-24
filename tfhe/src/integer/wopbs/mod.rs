@@ -10,9 +10,7 @@ use super::ciphertext::RadixCiphertext;
 pub use crate::core_crypto::commons::parameters::{CiphertextCount, PlaintextCount};
 use crate::core_crypto::prelude::*;
 use crate::integer::client_key::utils::i_crt;
-use crate::integer::{
-    ClientKey, CrtCiphertext, IntegerCiphertext, IntegerCiphertextRef, ServerKey,
-};
+use crate::integer::{ClientKey, CrtCiphertext, IntegerCiphertext, ServerKey};
 use crate::shortint::ciphertext::Degree;
 use crate::shortint::wopbs::WopbsLUTBase;
 use crate::shortint::WopbsParameters;

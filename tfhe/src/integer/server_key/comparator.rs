@@ -3,6 +3,7 @@ use rayon::prelude::*;
 use super::ServerKey;
 use crate::core_crypto::prelude::Plaintext;
 use crate::integer::block_decomposition::{BlockDecomposer, DecomposableInto};
+use crate::integer::ciphertext::boolean_value::BooleanBlock;
 use crate::integer::ciphertext::IntegerRadixCiphertext;
 use crate::shortint::server_key::LookupTableOwned;
 use crate::shortint::Ciphertext;
@@ -26,7 +27,7 @@ enum MinMaxSelector {
 /// This struct keeps in memory the LUTs that are used
 /// during the comparisons and min/max algorithms
 pub struct Comparator<'a> {
-    server_key: &'a ServerKey,
+    pub(crate) server_key: &'a ServerKey,
     // lut to get the sign of (a - b), used as the backbone of comparisons
     sign_lut: LookupTableOwned,
     // lut used to reduce 2 comparison blocks into 1
@@ -947,14 +948,12 @@ impl<'a> Comparator<'a> {
     /// And use the given `sign_result_handler_fn`
     /// to convert it to a radix ciphertext that encrypts
     /// a boolean value.
-    fn map_sign_result<T, F>(
+    fn map_sign_result<F>(
         &self,
         comparison: crate::shortint::Ciphertext,
         sign_result_handler_fn: F,
-        num_blocks: usize,
-    ) -> T
+    ) -> BooleanBlock
     where
-        T: IntegerRadixCiphertext,
         F: Fn(u64) -> bool,
     {
         let acc = self
@@ -962,14 +961,7 @@ impl<'a> Comparator<'a> {
             .key
             .generate_lookup_table(|x| u64::from(sign_result_handler_fn(x)));
         let result_block = self.server_key.key.apply_lookup_table(&comparison, &acc);
-
-        let mut blocks = Vec::with_capacity(num_blocks);
-        blocks.push(result_block);
-        for _ in 0..num_blocks - 1 {
-            blocks.push(self.server_key.key.create_trivial(0));
-        }
-
-        T::from_blocks(blocks)
+        BooleanBlock::new_unchecked(result_block)
     }
 
     /// Helper function to implement unchecked_lt, unchecked_ge, etc
@@ -981,14 +973,14 @@ impl<'a> Comparator<'a> {
         sign_result_handler_fn: F,
         lhs: &'b T,
         rhs: &'b T,
-    ) -> T
+    ) -> BooleanBlock
     where
         T: IntegerRadixCiphertext,
         CmpFn: Fn(&Self, &'b T, &'b T) -> crate::shortint::Ciphertext,
         F: Fn(u64) -> bool,
     {
         let comparison = comparison_fn(self, lhs, rhs);
-        self.map_sign_result(comparison, sign_result_handler_fn, lhs.blocks().len())
+        self.map_sign_result(comparison, sign_result_handler_fn)
     }
 
     /// Helper function to implement smart_lt, smart_ge, etc
@@ -998,21 +990,21 @@ impl<'a> Comparator<'a> {
         sign_result_handler_fn: F,
         lhs: &mut T,
         rhs: &mut T,
-    ) -> T
+    ) -> BooleanBlock
     where
         T: IntegerRadixCiphertext,
         CmpFn: Fn(&Self, &mut T, &mut T) -> crate::shortint::Ciphertext,
         F: Fn(u64) -> bool,
     {
         let comparison = smart_comparison_fn(self, lhs, rhs);
-        self.map_sign_result(comparison, sign_result_handler_fn, lhs.blocks().len())
+        self.map_sign_result(comparison, sign_result_handler_fn)
     }
 
     //======================================
     // Unchecked Single-Threaded operations
     //======================================
 
-    pub fn unchecked_gt<T>(&self, lhs: &T, rhs: &T) -> T
+    pub fn unchecked_gt<T>(&self, lhs: &T, rhs: &T) -> BooleanBlock
     where
         T: IntegerRadixCiphertext,
     {
@@ -1024,7 +1016,7 @@ impl<'a> Comparator<'a> {
         )
     }
 
-    pub fn unchecked_ge<T>(&self, lhs: &T, rhs: &T) -> T
+    pub fn unchecked_ge<T>(&self, lhs: &T, rhs: &T) -> BooleanBlock
     where
         T: IntegerRadixCiphertext,
     {
@@ -1036,7 +1028,7 @@ impl<'a> Comparator<'a> {
         )
     }
 
-    pub fn unchecked_lt<T>(&self, lhs: &T, rhs: &T) -> T
+    pub fn unchecked_lt<T>(&self, lhs: &T, rhs: &T) -> BooleanBlock
     where
         T: IntegerRadixCiphertext,
     {
@@ -1048,7 +1040,7 @@ impl<'a> Comparator<'a> {
         )
     }
 
-    pub fn unchecked_le<T>(&self, lhs: &T, rhs: &T) -> T
+    pub fn unchecked_le<T>(&self, lhs: &T, rhs: &T) -> BooleanBlock
     where
         T: IntegerRadixCiphertext,
     {
@@ -1078,7 +1070,7 @@ impl<'a> Comparator<'a> {
     // Unchecked Multi-Threaded operations
     //======================================
 
-    pub fn unchecked_gt_parallelized<T>(&self, lhs: &T, rhs: &T) -> T
+    pub fn unchecked_gt_parallelized<T>(&self, lhs: &T, rhs: &T) -> BooleanBlock
     where
         T: IntegerRadixCiphertext,
     {
@@ -1090,7 +1082,7 @@ impl<'a> Comparator<'a> {
         )
     }
 
-    pub fn unchecked_ge_parallelized<T>(&self, lhs: &T, rhs: &T) -> T
+    pub fn unchecked_ge_parallelized<T>(&self, lhs: &T, rhs: &T) -> BooleanBlock
     where
         T: IntegerRadixCiphertext,
     {
@@ -1102,7 +1094,7 @@ impl<'a> Comparator<'a> {
         )
     }
 
-    pub fn unchecked_lt_parallelized<T>(&self, lhs: &T, rhs: &T) -> T
+    pub fn unchecked_lt_parallelized<T>(&self, lhs: &T, rhs: &T) -> BooleanBlock
     where
         T: IntegerRadixCiphertext,
     {
@@ -1114,7 +1106,7 @@ impl<'a> Comparator<'a> {
         )
     }
 
-    pub fn unchecked_le_parallelized<T>(&self, lhs: &T, rhs: &T) -> T
+    pub fn unchecked_le_parallelized<T>(&self, lhs: &T, rhs: &T) -> BooleanBlock
     where
         T: IntegerRadixCiphertext,
     {
@@ -1144,14 +1136,14 @@ impl<'a> Comparator<'a> {
     // Smart Single-Threaded operations
     //======================================
 
-    pub fn smart_gt<T>(&self, lhs: &mut T, rhs: &mut T) -> T
+    pub fn smart_gt<T>(&self, lhs: &mut T, rhs: &mut T) -> BooleanBlock
     where
         T: IntegerRadixCiphertext,
     {
         self.smart_comparison_impl(Self::smart_compare, |x| x == Self::IS_SUPERIOR, lhs, rhs)
     }
 
-    pub fn smart_ge<T>(&self, lhs: &mut T, rhs: &mut T) -> T
+    pub fn smart_ge<T>(&self, lhs: &mut T, rhs: &mut T) -> BooleanBlock
     where
         T: IntegerRadixCiphertext,
     {
@@ -1163,14 +1155,14 @@ impl<'a> Comparator<'a> {
         )
     }
 
-    pub fn smart_lt<T>(&self, lhs: &mut T, rhs: &mut T) -> T
+    pub fn smart_lt<T>(&self, lhs: &mut T, rhs: &mut T) -> BooleanBlock
     where
         T: IntegerRadixCiphertext,
     {
         self.smart_comparison_impl(Self::smart_compare, |x| x == Self::IS_INFERIOR, lhs, rhs)
     }
 
-    pub fn smart_le<T>(&self, lhs: &mut T, rhs: &mut T) -> T
+    pub fn smart_le<T>(&self, lhs: &mut T, rhs: &mut T) -> BooleanBlock
     where
         T: IntegerRadixCiphertext,
     {
@@ -1200,7 +1192,7 @@ impl<'a> Comparator<'a> {
     // Smart Multi-Threaded operations
     //======================================
 
-    pub fn smart_gt_parallelized<T>(&self, lhs: &mut T, rhs: &mut T) -> T
+    pub fn smart_gt_parallelized<T>(&self, lhs: &mut T, rhs: &mut T) -> BooleanBlock
     where
         T: IntegerRadixCiphertext,
     {
@@ -1212,7 +1204,7 @@ impl<'a> Comparator<'a> {
         )
     }
 
-    pub fn smart_ge_parallelized<T>(&self, lhs: &mut T, rhs: &mut T) -> T
+    pub fn smart_ge_parallelized<T>(&self, lhs: &mut T, rhs: &mut T) -> BooleanBlock
     where
         T: IntegerRadixCiphertext,
     {
@@ -1224,7 +1216,7 @@ impl<'a> Comparator<'a> {
         )
     }
 
-    pub fn smart_lt_parallelized<T>(&self, lhs: &mut T, rhs: &mut T) -> T
+    pub fn smart_lt_parallelized<T>(&self, lhs: &mut T, rhs: &mut T) -> BooleanBlock
     where
         T: IntegerRadixCiphertext,
     {
@@ -1236,7 +1228,7 @@ impl<'a> Comparator<'a> {
         )
     }
 
-    pub fn smart_le_parallelized<T>(&self, lhs: &mut T, rhs: &mut T) -> T
+    pub fn smart_le_parallelized<T>(&self, lhs: &mut T, rhs: &mut T) -> BooleanBlock
     where
         T: IntegerRadixCiphertext,
     {
@@ -1266,7 +1258,7 @@ impl<'a> Comparator<'a> {
     // "Default" Multi-Threaded operations
     //======================================
 
-    pub fn gt_parallelized<T>(&self, lhs: &T, rhs: &T) -> T
+    pub fn gt_parallelized<T>(&self, lhs: &T, rhs: &T) -> BooleanBlock
     where
         T: IntegerRadixCiphertext,
     {
@@ -1298,7 +1290,7 @@ impl<'a> Comparator<'a> {
         self.unchecked_gt_parallelized(lhs, rhs)
     }
 
-    pub fn ge_parallelized<T>(&self, lhs: &T, rhs: &T) -> T
+    pub fn ge_parallelized<T>(&self, lhs: &T, rhs: &T) -> BooleanBlock
     where
         T: IntegerRadixCiphertext,
     {
@@ -1330,7 +1322,7 @@ impl<'a> Comparator<'a> {
         self.unchecked_ge_parallelized(lhs, rhs)
     }
 
-    pub fn lt_parallelized<T>(&self, lhs: &T, rhs: &T) -> T
+    pub fn lt_parallelized<T>(&self, lhs: &T, rhs: &T) -> BooleanBlock
     where
         T: IntegerRadixCiphertext,
     {
@@ -1362,7 +1354,7 @@ impl<'a> Comparator<'a> {
         self.unchecked_lt_parallelized(lhs, rhs)
     }
 
-    pub fn le_parallelized<T>(&self, lhs: &T, rhs: &T) -> T
+    pub fn le_parallelized<T>(&self, lhs: &T, rhs: &T) -> BooleanBlock
     where
         T: IntegerRadixCiphertext,
     {
@@ -1472,17 +1464,17 @@ impl<'a> Comparator<'a> {
         lhs: &T,
         rhs: Scalar,
         sign_result_handler_fn: F,
-    ) -> T
+    ) -> BooleanBlock
     where
         T: IntegerRadixCiphertext,
         Scalar: DecomposableInto<u64>,
         F: Fn(u64) -> bool + Sync,
     {
         let sign_block = self.unchecked_scalar_compare_parallelized(lhs, rhs);
-        self.map_sign_result(sign_block, sign_result_handler_fn, lhs.blocks().len())
+        self.map_sign_result(sign_block, sign_result_handler_fn)
     }
 
-    pub fn unchecked_scalar_gt_parallelized<T, Scalar>(&self, lhs: &T, rhs: Scalar) -> T
+    pub fn unchecked_scalar_gt_parallelized<T, Scalar>(&self, lhs: &T, rhs: Scalar) -> BooleanBlock
     where
         T: IntegerRadixCiphertext,
         Scalar: DecomposableInto<u64>,
@@ -1490,7 +1482,7 @@ impl<'a> Comparator<'a> {
         self.unchecked_scalar_compare_parallelized_handler(lhs, rhs, |x| x == Self::IS_SUPERIOR)
     }
 
-    pub fn unchecked_scalar_ge_parallelized<T, Scalar>(&self, lhs: &T, rhs: Scalar) -> T
+    pub fn unchecked_scalar_ge_parallelized<T, Scalar>(&self, lhs: &T, rhs: Scalar) -> BooleanBlock
     where
         T: IntegerRadixCiphertext,
         Scalar: DecomposableInto<u64>,
@@ -1500,7 +1492,7 @@ impl<'a> Comparator<'a> {
         })
     }
 
-    pub fn unchecked_scalar_lt_parallelized<T, Scalar>(&self, lhs: &T, rhs: Scalar) -> T
+    pub fn unchecked_scalar_lt_parallelized<T, Scalar>(&self, lhs: &T, rhs: Scalar) -> BooleanBlock
     where
         T: IntegerRadixCiphertext,
         Scalar: DecomposableInto<u64>,
@@ -1508,7 +1500,7 @@ impl<'a> Comparator<'a> {
         self.unchecked_scalar_compare_parallelized_handler(lhs, rhs, |x| x == Self::IS_INFERIOR)
     }
 
-    pub fn unchecked_scalar_le_parallelized<T, Scalar>(&self, lhs: &T, rhs: Scalar) -> T
+    pub fn unchecked_scalar_le_parallelized<T, Scalar>(&self, lhs: &T, rhs: Scalar) -> BooleanBlock
     where
         T: IntegerRadixCiphertext,
         Scalar: DecomposableInto<u64>,
@@ -1543,7 +1535,7 @@ impl<'a> Comparator<'a> {
         lhs: &mut T,
         rhs: Scalar,
         sign_result_handler_fn: F,
-    ) -> T
+    ) -> BooleanBlock
     where
         T: IntegerRadixCiphertext,
         Scalar: DecomposableInto<u64>,
@@ -1555,7 +1547,7 @@ impl<'a> Comparator<'a> {
         self.unchecked_scalar_compare_parallelized_handler(lhs, rhs, sign_result_handler_fn)
     }
 
-    pub fn smart_scalar_gt_parallelized<T, Scalar>(&self, lhs: &mut T, rhs: Scalar) -> T
+    pub fn smart_scalar_gt_parallelized<T, Scalar>(&self, lhs: &mut T, rhs: Scalar) -> BooleanBlock
     where
         T: IntegerRadixCiphertext,
         Scalar: DecomposableInto<u64>,
@@ -1563,7 +1555,7 @@ impl<'a> Comparator<'a> {
         self.smart_scalar_compare_parallelized(lhs, rhs, |x| x == Self::IS_SUPERIOR)
     }
 
-    pub fn smart_scalar_ge_parallelized<T, Scalar>(&self, lhs: &mut T, rhs: Scalar) -> T
+    pub fn smart_scalar_ge_parallelized<T, Scalar>(&self, lhs: &mut T, rhs: Scalar) -> BooleanBlock
     where
         T: IntegerRadixCiphertext,
         Scalar: DecomposableInto<u64>,
@@ -1573,7 +1565,7 @@ impl<'a> Comparator<'a> {
         })
     }
 
-    pub fn smart_scalar_lt_parallelized<T, Scalar>(&self, lhs: &mut T, rhs: Scalar) -> T
+    pub fn smart_scalar_lt_parallelized<T, Scalar>(&self, lhs: &mut T, rhs: Scalar) -> BooleanBlock
     where
         T: IntegerRadixCiphertext,
         Scalar: DecomposableInto<u64>,
@@ -1581,7 +1573,7 @@ impl<'a> Comparator<'a> {
         self.smart_scalar_compare_parallelized(lhs, rhs, |x| x == Self::IS_INFERIOR)
     }
 
-    pub fn smart_scalar_le_parallelized<T, Scalar>(&self, lhs: &mut T, rhs: Scalar) -> T
+    pub fn smart_scalar_le_parallelized<T, Scalar>(&self, lhs: &mut T, rhs: Scalar) -> BooleanBlock
     where
         T: IntegerRadixCiphertext,
         Scalar: DecomposableInto<u64>,
@@ -1622,7 +1614,7 @@ impl<'a> Comparator<'a> {
         lhs: &T,
         rhs: Scalar,
         sign_result_handler_fn: F,
-    ) -> T
+    ) -> BooleanBlock
     where
         T: IntegerRadixCiphertext,
         Scalar: DecomposableInto<u64>,
@@ -1639,7 +1631,7 @@ impl<'a> Comparator<'a> {
         self.unchecked_scalar_compare_parallelized_handler(lhs, rhs, sign_result_handler_fn)
     }
 
-    pub fn scalar_gt_parallelized<T, Scalar>(&self, lhs: &T, rhs: Scalar) -> T
+    pub fn scalar_gt_parallelized<T, Scalar>(&self, lhs: &T, rhs: Scalar) -> BooleanBlock
     where
         T: IntegerRadixCiphertext,
         Scalar: DecomposableInto<u64>,
@@ -1647,7 +1639,7 @@ impl<'a> Comparator<'a> {
         self.default_scalar_compare_parallelized(lhs, rhs, |x| x == Self::IS_SUPERIOR)
     }
 
-    pub fn scalar_ge_parallelized<T, Scalar>(&self, lhs: &T, rhs: Scalar) -> T
+    pub fn scalar_ge_parallelized<T, Scalar>(&self, lhs: &T, rhs: Scalar) -> BooleanBlock
     where
         T: IntegerRadixCiphertext,
         Scalar: DecomposableInto<u64>,
@@ -1657,7 +1649,7 @@ impl<'a> Comparator<'a> {
         })
     }
 
-    pub fn scalar_lt_parallelized<T, Scalar>(&self, lhs: &T, rhs: Scalar) -> T
+    pub fn scalar_lt_parallelized<T, Scalar>(&self, lhs: &T, rhs: Scalar) -> BooleanBlock
     where
         T: IntegerRadixCiphertext,
         Scalar: DecomposableInto<u64>,
@@ -1665,7 +1657,7 @@ impl<'a> Comparator<'a> {
         self.default_scalar_compare_parallelized(lhs, rhs, |x| x == Self::IS_INFERIOR)
     }
 
-    pub fn scalar_le_parallelized<T, Scalar>(&self, lhs: &T, rhs: Scalar) -> T
+    pub fn scalar_le_parallelized<T, Scalar>(&self, lhs: &T, rhs: Scalar) -> BooleanBlock
     where
         T: IntegerRadixCiphertext,
         Scalar: DecomposableInto<u64>,

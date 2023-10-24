@@ -67,9 +67,10 @@ pub use bigint::i256::I256;
 pub use bigint::i512::I512;
 pub use bigint::u256::U256;
 pub use bigint::u512::U512;
+pub use ciphertext::boolean_value::BooleanBlock;
 pub use ciphertext::{
-    CrtCiphertext, IntegerCiphertext, IntegerCiphertextRef, IntegerRadixCiphertext,
-    RadixCiphertext, SignedRadixCiphertext,
+    CrtCiphertext, IntegerCiphertext, IntegerRadixCiphertext, RadixCiphertext,
+    SignedRadixCiphertext,
 };
 pub use client_key::{ClientKey, CrtClientKey, RadixClientKey};
 pub use public_key::{CompressedCompactPublicKey, CompressedPublicKey, PublicKey};
