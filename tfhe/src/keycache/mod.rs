@@ -215,4 +215,75 @@ pub mod utils {
             }
         }
     }
+
+    impl<P, K, S> KeyCache<P, K, S>
+    where
+        P: Copy + PartialEq + NamedParam,
+        S: PersistentStorage<P, K>,
+    {
+        pub fn get_with_closure<C: FnMut(P) -> K>(&self, param: P, c: &mut C) -> SharedKey<K> {
+            self.with_closure(param, c).clone()
+        }
+
+        pub fn with_closure<C>(&self, param: P, c: &mut C) -> SharedKey<K>
+        // pub fn with_closure<C, R: Clone>(&self, param: P, c: C) -> R
+        where
+            C: FnMut(P) -> K,
+        {
+            let load_from_persistent_storage = || {
+                // we check if we can load the key from persistent storage
+                let persistent_storage = &self.persistent_storage;
+                let maybe_key = persistent_storage.load(param);
+                match maybe_key {
+                    Some(key) => key,
+                    None => {
+                        let key = c(param);
+                        persistent_storage.store(param, &key);
+                        key
+                    }
+                }
+            };
+
+            let try_load_from_memory_and_init = || -> Result<_, ()> {
+                // we only hold a read lock for a short duration to find the key
+                let maybe_shared_cell = {
+                    let memory_storage = self.memory_storage.read().unwrap();
+                    memory_storage
+                        .iter()
+                        .find(|(p, _)| *p == param)
+                        .map(|param_key| param_key.1.clone())
+                };
+
+                if let Some(shared_cell) = maybe_shared_cell {
+                    // shared_cell
+                    Ok(shared_cell)
+                } else {
+                    {
+                        // we only hold a write lock for a short duration to push the lazily
+                        // evaluated key without actually evaluating the key
+                        let mut memory_storage = self.memory_storage.write().unwrap();
+                        if !memory_storage.iter().any(|(p, _)| *p == param) {
+                            memory_storage.push((
+                                param,
+                                SharedKey {
+                                    inner: Arc::new(OnceLock::new()),
+                                },
+                            ));
+                        }
+                    }
+                    let memory_storage = self.memory_storage.read().unwrap();
+                    let shared_cell = memory_storage
+                        .iter()
+                        .find(|(p, _)| *p == param)
+                        .map(|param_key| param_key.1.clone())
+                        .unwrap();
+
+                    shared_cell.inner.get_or_init(load_from_persistent_storage);
+                    Ok(shared_cell)
+                }
+            };
+
+            try_load_from_memory_and_init().ok().unwrap()
+        }
+    }
 }

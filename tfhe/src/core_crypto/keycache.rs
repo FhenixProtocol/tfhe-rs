@@ -5,38 +5,33 @@ use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Copy, PartialEq, Serialize, Deserialize)]
-pub struct LweMultiBitBootstrapParameters<Scalar: UnsignedInteger> {
-    fill_with: Scalar,
-    glwe_size: GlweSize,
-    glwe_modular_std_dev: StandardDev,
-    polynomial_size: PolynomialSize,
-    decomp_base_log: DecompositionBaseLog,
-    decomp_level_count: DecompositionLevelCount,
-    input_lwe_dimension: LweDimension,
-    grouping_factor: LweBskGroupingFactor,
-    ciphertext_modulus: CiphertextModulus<Scalar>,
-    input_lwe_secret_key: &LweSecretKeyOwned<Scalar>,
-    output_glwe_secret_key: &GlweSecretKeyOwned<Scalar>,
-    encryption_random_generator: &mut EncryptionRandomGenerator<ActivatedRandomGenerator>,
+pub struct MultiBitParams<Scalar: UnsignedInteger> {
+    pub input_lwe_dimension: LweDimension,
+    pub lwe_modular_std_dev: StandardDev,
+    pub decomp_base_log: DecompositionBaseLog,
+    pub decomp_level_count: DecompositionLevelCount,
+    pub glwe_dimension: GlweDimension,
+    pub polynomial_size: PolynomialSize,
+    pub glwe_modular_std_dev: StandardDev,
+    pub message_modulus_log: CiphertextModulusLog,
+    pub ciphertext_modulus: CiphertextModulus<Scalar>,
+    pub grouping_factor: LweBskGroupingFactor,
+    pub thread_count: ThreadCount,
 }
 
-impl<Scalar: UnsignedInteger> NamedParam for LweMultiBitBootstrapParameters<Scalar> {
+impl<Scalar: UnsignedInteger> NamedParam for MultiBitParams<Scalar> {
     fn name(&self) -> String {
         format!(
-            "PARAM_LWE_MULTI_BIT_BOOTSTRAP_glwe_{}_poly_{}_decomp_base_log_{}_decomp_level_{}_input_dim_{}_group_fact_{}_ct_modulus_{}",
-            self.glwe_size.0, self.polynomial_size.0, self.decomp_base_log.0,
+            "PARAM_LWE_MULTI_BIT_BOOTSTRAP_glwe_{}_poly_{}_decomp_base_log_{}_decomp_level_{}_input_dim_{}_group_fact_{}_ct_modulus_{}_group_factor_{}_thread_count_{}",
+            self.glwe_dimension.0, self.polynomial_size.0, self.decomp_base_log.0,
             self.decomp_level_count.0, self.input_lwe_dimension.0, self.grouping_factor.0,
-            self.ciphertext_modulus
+            self.ciphertext_modulus, self.grouping_factor.0, self.thread_count.0,
         )
     }
 }
 
 pub struct KeyCacheCoreImpl<Scalar: UnsignedInteger> {
-    inner: ImplKeyCache<
-        LweMultiBitBootstrapParameters<Scalar>,
-        LweMultiBitBootstrapKeyOwned<Scalar>,
-        FileStorage,
-    >,
+    inner: ImplKeyCache<MultiBitParams<Scalar>, MultiBitBootstrapKeys<Scalar>, FileStorage>,
 }
 
 impl<Scalar: UnsignedInteger> Default for KeyCacheCoreImpl<Scalar> {
@@ -49,76 +44,45 @@ impl<Scalar: UnsignedInteger> Default for KeyCacheCoreImpl<Scalar> {
     }
 }
 
+pub type MultiBitBootstrapKeys<Scalar> = (
+    LweMultiBitBootstrapKeyOwned<Scalar>,
+    LweSecretKey<Vec<Scalar>>,
+    LweSecretKey<Vec<Scalar>>,
+    FourierLweMultiBitBootstrapKeyOwned,
+);
+
 pub struct SharedMultiBitBootstrapKey<Scalar: UnsignedInteger> {
-    inner: GenericSharedKey<LweMultiBitBootstrapKeyOwned<Scalar>>,
+    inner: GenericSharedKey<MultiBitBootstrapKeys<Scalar>>,
 }
 
 impl<Scalar: UnsignedInteger> SharedMultiBitBootstrapKey<Scalar> {
-    pub fn key(&self) -> &LweMultiBitBootstrapKeyOwned<Scalar> {
-        &self.inner
+    pub fn bootstrap_key(&self) -> &LweMultiBitBootstrapKeyOwned<Scalar> {
+        &self.inner.0
+    }
+    pub fn input_key(&self) -> &LweSecretKey<Vec<Scalar>> {
+        &self.inner.1
+    }
+    pub fn output_key(&self) -> &LweSecretKey<Vec<Scalar>> {
+        &self.inner.2
+    }
+    pub fn fourier_bootstrap_key(&self) -> &FourierLweMultiBitBootstrapKeyOwned {
+        &self.inner.3
     }
 }
 
-impl<Scalar: UnsignedInteger> From<LweMultiBitBootstrapParameters<Scalar>>
-    for LweMultiBitBootstrapKeyOwned<Scalar>
+impl<Scalar: UnsignedInteger + UnsignedTorus + CastFrom<usize> + Serialize + DeserializeOwned>
+    KeyCacheCoreImpl<Scalar>
 {
-    fn from(param: LweMultiBitBootstrapParameters<Scalar>) -> Self {
-        let mut bsk = LweMultiBitBootstrapKey::new(
-            param.fill_with,
-            param.glwe_size,
-            param.polynomial_size,
-            param.decomp_base_log,
-            param.decomp_level_count,
-            param.input_lwe_dimension,
-            param.grouping_factor,
-            param.ciphertext_modulus,
-        );
-
-        par_generate_lwe_multi_bit_bootstrap_key(
-            param.input_lwe_secret_key,
-            param.output_glwe_secret_key,
-            &mut bsk,
-            param.glwe_modular_std_dev,
-            param.encryption_random_generator,
-        );
-
-        bsk
-    }
-}
-
-impl<Scalar: UnsignedInteger + UnsignedTorus + CastFrom<usize> + Serialize + DeserializeOwned> KeyCacheCoreImpl<Scalar> {
-    pub fn get_multi_bit_key(
+    pub fn get_multi_bit_key_with_closure<C>(
         &self,
-        fill_with: Scalar,
-        glwe_size: GlweSize,
-        glwe_modular_std_dev: StandardDev,
-        polynomial_size: PolynomialSize,
-        decomp_base_log: DecompositionBaseLog,
-        decomp_level_count: DecompositionLevelCount,
-        input_lwe_dimension: LweDimension,
-        grouping_factor: LweBskGroupingFactor,
-        ciphertext_modulus: CiphertextModulus<Scalar>,
-        input_lwe_secret_key: &LweSecretKeyOwned<Scalar>,
-        output_glwe_secret_key: &GlweSecretKeyOwned<Scalar>,
-        encryption_random_generator: &mut EncryptionRandomGenerator<ActivatedRandomGenerator>,
-    ) -> SharedMultiBitBootstrapKey<Scalar> {
-        let param = LweMultiBitBootstrapParameters {
-            fill_with,
-            glwe_size,
-            glwe_modular_std_dev,
-            polynomial_size,
-            decomp_base_log,
-            decomp_level_count,
-            input_lwe_dimension,
-            grouping_factor,
-            ciphertext_modulus,
-            input_lwe_secret_key,
-            output_glwe_secret_key,
-            encryption_random_generator,
-        };
-
+        params: MultiBitParams<Scalar>,
+        mut c: C,
+    ) -> SharedMultiBitBootstrapKey<Scalar>
+    where
+        C: FnMut(MultiBitParams<Scalar>) -> MultiBitBootstrapKeys<Scalar>,
+    {
         SharedMultiBitBootstrapKey {
-            inner: self.inner.get(param),
+            inner: self.inner.get_with_closure(params, &mut c),
         }
     }
 
@@ -134,37 +98,21 @@ pub struct KeyCache {
 }
 
 impl KeyCache {
-    pub fn get_multi_bit_key<
-        Scalar: UnsignedInteger + UnsignedTorus + CastFrom<usize> + KeyCacheAccess + Serialize + DeserializeOwned,
-    >(
+    pub fn get_multi_bit_key_with_closure<C, P, Scalar>(
         &self,
-        fill_with: Scalar,
-        glwe_size: GlweSize,
-        glwe_modular_std_dev: StandardDev,
-        polynomial_size: PolynomialSize,
-        decomp_base_log: DecompositionBaseLog,
-        decomp_level_count: DecompositionLevelCount,
-        input_lwe_dimension: LweDimension,
-        grouping_factor: LweBskGroupingFactor,
-        ciphertext_modulus: CiphertextModulus<Scalar>,
-        input_lwe_secret_key: &LweSecretKeyOwned<Scalar>,
-        output_glwe_secret_key: &GlweSecretKeyOwned<Scalar>,
-        encryption_random_generator: &mut EncryptionRandomGenerator<ActivatedRandomGenerator>,
-    ) -> SharedMultiBitBootstrapKey<Scalar> {
-        Scalar::access(self).get_multi_bit_key(
-            fill_with,
-            glwe_size,
-            glwe_modular_std_dev,
-            polynomial_size,
-            decomp_base_log,
-            decomp_level_count,
-            input_lwe_dimension,
-            grouping_factor,
-            ciphertext_modulus,
-            input_lwe_secret_key,
-            output_glwe_secret_key,
-            encryption_random_generator
-        )
+        params: MultiBitParams<Scalar>,
+        c: C,
+    ) -> SharedMultiBitBootstrapKey<Scalar>
+    where
+        C: FnMut(MultiBitParams<Scalar>) -> MultiBitBootstrapKeys<Scalar>,
+        Scalar: UnsignedInteger
+            + UnsignedTorus
+            + CastFrom<usize>
+            + KeyCacheAccess
+            + Serialize
+            + DeserializeOwned,
+    {
+        Scalar::access(self).get_multi_bit_key_with_closure(params, c)
     }
 }
 
