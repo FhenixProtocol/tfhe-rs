@@ -1,6 +1,6 @@
 use crate::core_crypto::algorithms::*;
 use crate::core_crypto::entities::*;
-use crate::shortint::ciphertext::{Degree, NoiseLevel};
+use crate::shortint::ciphertext::Degree;
 use crate::shortint::engine::{EngineResult, ShortintEngine};
 use crate::shortint::{Ciphertext, ServerKey};
 
