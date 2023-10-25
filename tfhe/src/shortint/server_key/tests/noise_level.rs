@@ -174,10 +174,10 @@ fn test_ct_scalar_op_noise_level_propagation(sk: &ServerKey, ct: &Ciphertext, sc
         assert!(op(sk, ct, scalar).noise_level() == predicate(ct.noise_level(), scalar));
     };
 
-    test_fn(&ServerKey::unchecked_scalar_add, &|ct1_noise, _| ct1_noise);
-    test_fn(&ServerKey::unchecked_scalar_sub, &|ct1_noise, _| ct1_noise);
-    test_fn(&ServerKey::unchecked_scalar_mul, &|ct1_noise, ct2_noise| {
-        ct1_noise * ct2_noise as usize
+    test_fn(&ServerKey::unchecked_scalar_add, &|ct_noise, _| ct_noise);
+    test_fn(&ServerKey::unchecked_scalar_sub, &|ct_noise, _| ct_noise);
+    test_fn(&ServerKey::unchecked_scalar_mul, &|ct_noise, scalar| {
+        ct_noise * scalar as usize
     });
     if scalar != 0 {
         test_fn(&ServerKey::unchecked_scalar_div, &|_, _| {
@@ -199,7 +199,7 @@ fn test_ct_scalar_op_noise_level_propagation(sk: &ServerKey, ct: &Ciphertext, sc
     if scalar < 8 {
         test_fn(
             &ServerKey::unchecked_scalar_left_shift,
-            &|ct1_noise, ct2_noise| ct1_noise * (1 << ct2_noise as usize),
+            &|ct_noise, scalar| ct_noise * (1 << scalar as usize),
         );
     }
     test_fn(&ServerKey::unchecked_scalar_right_shift, &|_, _| {
@@ -215,15 +215,15 @@ fn test_ct_scalar_op_assign_noise_level_propagation(sk: &ServerKey, ct: &Ciphert
         assert!(clone.noise_level() == predicate(ct.noise_level(), scalar));
     };
 
-    test_fn(&ServerKey::unchecked_scalar_add_assign, &|ct1_noise, _| {
-        ct1_noise
+    test_fn(&ServerKey::unchecked_scalar_add_assign, &|ct_noise, _| {
+        ct_noise
     });
-    test_fn(&ServerKey::unchecked_scalar_sub_assign, &|ct1_noise, _| {
-        ct1_noise
+    test_fn(&ServerKey::unchecked_scalar_sub_assign, &|ct_noise, _| {
+        ct_noise
     });
     test_fn(
         &ServerKey::unchecked_scalar_mul_assign,
-        &|ct1_noise, ct2_noise| ct1_noise * ct2_noise as usize,
+        &|ct_noise, scalar| ct_noise * scalar as usize,
     );
     if scalar != 0 {
         test_fn(&ServerKey::unchecked_scalar_div_assign, &|_, _| {
@@ -245,7 +245,7 @@ fn test_ct_scalar_op_assign_noise_level_propagation(sk: &ServerKey, ct: &Ciphert
     if scalar < 8 {
         test_fn(
             &ServerKey::unchecked_scalar_left_shift_assign,
-            &|ct1_noise, ct2_noise| ct1_noise * (1 << ct2_noise as usize),
+            &|ct_noise, scalar| ct_noise * (1 << scalar as usize),
         );
     }
     test_fn(&ServerKey::unchecked_scalar_right_shift_assign, &|_, _| {
