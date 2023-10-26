@@ -59,10 +59,11 @@ impl ShortintEngine {
             self.unchecked_scalar_sub_assign(server_key, ct, scalar)?;
         } else {
             let scalar = u64::from(scalar);
+            let msg_mod = server_key.message_modulus.0 as u64;
             // If the scalar is too large, PBS is used to compute the scalar sub
             let acc = self.generate_msg_lookup_table(
                 server_key,
-                |x| x.wrapping_sub(scalar),
+                |x| x + msg_mod - (scalar % msg_mod),
                 server_key.message_modulus,
             )?;
             self.apply_lookup_table_assign(server_key, ct, &acc)?;
