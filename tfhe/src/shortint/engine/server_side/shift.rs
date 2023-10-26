@@ -70,8 +70,11 @@ impl ShortintEngine {
             self.unchecked_scalar_left_shift_assign(ct, shift)?;
         } else {
             let modulus = server_key.message_modulus.0 as u64;
-            let acc =
-                self.generate_msg_lookup_table(server_key, |x| x << shift, ct.message_modulus)?;
+            let acc = self.generate_msg_lookup_table(
+                server_key,
+                |x| x << shift,
+                server_key.message_modulus,
+            )?;
             self.apply_lookup_table_assign(server_key, ct, &acc)?;
             ct.degree = ct.degree.after_left_shift(shift, modulus as usize);
         }
