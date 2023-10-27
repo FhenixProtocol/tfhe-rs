@@ -1,6 +1,7 @@
 pub use super::misc::check_content_respects_mod;
 use crate::core_crypto::prelude::*;
 use paste::paste;
+use std::fmt::Debug;
 
 mod ggsw_encryption;
 mod glwe_encryption;
@@ -202,6 +203,35 @@ where
         &accumulator_plaintext,
         ciphertext_modulus,
     )
+}
+
+pub(crate) fn gen_keys_or_get_from_cache_if_enabled<K, P: Debug, Scalar>(
+    params: P,
+    keygen_func: &mut dyn FnMut(P) -> K,
+) -> K {
+    #[cfg(feature = "internal-keycache")]
+    {
+        use crate::core_crypto::keycache::{MultiBitTestParams, KEY_CACHE};
+        use std::any::TypeId;
+
+        let params_type_id = TypeId::of::<(P, K)>();
+        match params_type_id {
+            TypeId::of::<MultiBitTestParams<Scalar>>() => KEY_CACHE
+                .get_multi_bit_key_with_closure(params, keygen_func)
+                .clone_into_owned(),
+            _ => {
+                println!(
+                    "[Warning]There is no keycache for type of params {:?}",
+                    params
+                );
+                keygen_func(params)
+            }
+        }
+    }
+    #[cfg(not(feature = "internal-keycache"))]
+    {
+        return keygen_func(params);
+    }
 }
 
 // Macro to generate tests for all parameter sets

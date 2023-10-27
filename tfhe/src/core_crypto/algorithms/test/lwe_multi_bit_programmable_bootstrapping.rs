@@ -1,6 +1,7 @@
 use super::*;
 use crate::core_crypto::keycache::{
-    KeyCacheAccess, MultiBitBootstrapKeys, MultiBitParams, KEY_CACHE,
+    KeyCacheAccess, MultiBitBootstrapKeys, MultiBitTestParams, SharedMultiBitBootstrapKey,
+    KEY_CACHE,
 };
 use serde::de::DeserializeOwned;
 use serde::Serialize;
@@ -25,7 +26,7 @@ fn generate_keys<
         + Serialize
         + DeserializeOwned,
 >(
-    params: MultiBitParams<Scalar>,
+    params: MultiBitTestParams<Scalar>,
     rsc: &mut TestResources,
 ) -> MultiBitBootstrapKeys<Scalar> {
     // Keygen is a bit slow on this one so we keep it out of the testing loop
@@ -85,7 +86,7 @@ fn lwe_encrypt_multi_bit_pbs_decrypt_custom_mod<
         + Serialize
         + DeserializeOwned,
 >(
-    params: MultiBitParams<Scalar>,
+    params: MultiBitTestParams<Scalar>,
 ) {
     let lwe_modular_std_dev = params.lwe_modular_std_dev;
     let ciphertext_modulus = params.ciphertext_modulus;
@@ -118,19 +119,15 @@ fn lwe_encrypt_multi_bit_pbs_decrypt_custom_mod<
 
     assert!(check_content_respects_mod(&accumulator, ciphertext_modulus));
 
-    let keys_gen = |_| generate_keys(params, &mut rsc);
+    let mut keys_gen = |_| generate_keys(params, &mut rsc);
 
-    let shared = KEY_CACHE
-        .get_multi_bit_key_with_closure::<_, MultiBitParams<Scalar>, Scalar>(params, keys_gen);
-
-    let (bsk, fbsk, input_lwe_secret_key, output_lwe_secret_key) = (
-        shared.bootstrap_key(),
-        shared.fourier_bootstrap_key(),
-        shared.input_key(),
-        shared.output_key(),
+    let shared = gen_keys_or_get_from_cache_if_enabled::<MultiBitBootstrapKeys<Scalar>, _, Scalar>(
+        params,
+        &mut keys_gen,
     );
+    let (bsk, input_lwe_secret_key, output_lwe_secret_key, fbsk) = shared;
 
-    assert!(check_content_respects_mod(&**bsk, ciphertext_modulus));
+    assert!(check_content_respects_mod(&*bsk, ciphertext_modulus));
 
     while msg != Scalar::ZERO {
         msg = msg.wrapping_sub(Scalar::ONE);
@@ -138,7 +135,7 @@ fn lwe_encrypt_multi_bit_pbs_decrypt_custom_mod<
             let plaintext = Plaintext(msg * delta);
 
             let lwe_ciphertext_in = allocate_and_encrypt_new_lwe_ciphertext(
-                input_lwe_secret_key,
+                &input_lwe_secret_key,
                 plaintext,
                 lwe_modular_std_dev,
                 ciphertext_modulus,
@@ -160,13 +157,13 @@ fn lwe_encrypt_multi_bit_pbs_decrypt_custom_mod<
                 &lwe_ciphertext_in,
                 &mut out_pbs_ct,
                 &accumulator,
-                fbsk,
+                &fbsk,
                 thread_count,
             );
 
             assert!(check_content_respects_mod(&out_pbs_ct, ciphertext_modulus));
 
-            let decrypted = decrypt_lwe_ciphertext(output_lwe_secret_key, &out_pbs_ct);
+            let decrypted = decrypt_lwe_ciphertext(&output_lwe_secret_key, &out_pbs_ct);
 
             let decoded = round_decode(decrypted.0, delta) % msg_modulus;
 
@@ -185,7 +182,7 @@ fn lwe_encrypt_multi_bit_deterministic_pbs_decrypt_custom_mod<
         + Serialize
         + DeserializeOwned,
 >(
-    params: MultiBitParams<Scalar>,
+    params: MultiBitTestParams<Scalar>,
 ) {
     let lwe_modular_std_dev = params.lwe_modular_std_dev;
     let ciphertext_modulus = params.ciphertext_modulus;
@@ -218,19 +215,15 @@ fn lwe_encrypt_multi_bit_deterministic_pbs_decrypt_custom_mod<
 
     assert!(check_content_respects_mod(&accumulator, ciphertext_modulus));
 
-    let keys_gen = |_| generate_keys(params, &mut rsc);
+    let mut keys_gen = |_| generate_keys(params, &mut rsc);
 
-    let shared = KEY_CACHE
-        .get_multi_bit_key_with_closure::<_, MultiBitParams<Scalar>, Scalar>(params, keys_gen);
-
-    let (bsk, fbsk, input_lwe_secret_key, output_lwe_secret_key) = (
-        shared.bootstrap_key(),
-        shared.fourier_bootstrap_key(),
-        shared.input_key(),
-        shared.output_key(),
+    let shared = gen_keys_or_get_from_cache_if_enabled::<MultiBitBootstrapKeys<Scalar>, _, Scalar>(
+        params,
+        &mut keys_gen,
     );
+    let (bsk, input_lwe_secret_key, output_lwe_secret_key, fbsk) = shared;
 
-    assert!(check_content_respects_mod(&**bsk, ciphertext_modulus));
+    assert!(check_content_respects_mod(&*bsk, ciphertext_modulus));
 
     while msg != Scalar::ZERO {
         msg = msg.wrapping_sub(Scalar::ONE);
@@ -238,7 +231,7 @@ fn lwe_encrypt_multi_bit_deterministic_pbs_decrypt_custom_mod<
             let plaintext = Plaintext(msg * delta);
 
             let lwe_ciphertext_in = allocate_and_encrypt_new_lwe_ciphertext(
-                input_lwe_secret_key,
+                &input_lwe_secret_key,
                 plaintext,
                 lwe_modular_std_dev,
                 ciphertext_modulus,
@@ -261,13 +254,13 @@ fn lwe_encrypt_multi_bit_deterministic_pbs_decrypt_custom_mod<
                     &lwe_ciphertext_in,
                     &mut out_pbs_ct,
                     &accumulator,
-                    fbsk,
+                    &fbsk,
                     thread_count,
                 );
 
                 assert!(check_content_respects_mod(&out_pbs_ct, ciphertext_modulus));
 
-                let decrypted = decrypt_lwe_ciphertext(output_lwe_secret_key, &out_pbs_ct);
+                let decrypted = decrypt_lwe_ciphertext(&output_lwe_secret_key, &out_pbs_ct);
 
                 let decoded = round_decode(decrypted.0, delta) % msg_modulus;
 
@@ -287,7 +280,7 @@ fn lwe_encrypt_multi_bit_deterministic_pbs_decrypt_custom_mod<
                     &lwe_ciphertext_in,
                     &mut out_pbs_ct,
                     &accumulator,
-                    fbsk,
+                    &fbsk,
                     thread_count,
                 );
 
@@ -309,7 +302,7 @@ fn lwe_encrypt_std_multi_bit_pbs_decrypt_custom_mod<
         + Serialize
         + DeserializeOwned,
 >(
-    params: MultiBitParams<Scalar>,
+    params: MultiBitTestParams<Scalar>,
 ) {
     let lwe_modular_std_dev = params.lwe_modular_std_dev;
     let ciphertext_modulus = params.ciphertext_modulus;
@@ -342,18 +335,15 @@ fn lwe_encrypt_std_multi_bit_pbs_decrypt_custom_mod<
 
     assert!(check_content_respects_mod(&accumulator, ciphertext_modulus));
 
-    let keys_gen = |_| generate_keys(params, &mut rsc);
+    let mut keys_gen = |_| generate_keys(params, &mut rsc);
 
-    let shared = KEY_CACHE
-        .get_multi_bit_key_with_closure::<_, MultiBitParams<Scalar>, Scalar>(params, keys_gen);
-
-    let (bsk, input_lwe_secret_key, output_lwe_secret_key) = (
-        shared.bootstrap_key(),
-        shared.input_key(),
-        shared.output_key(),
+    let shared = gen_keys_or_get_from_cache_if_enabled::<MultiBitBootstrapKeys<Scalar>, _, Scalar>(
+        params,
+        &mut keys_gen,
     );
+    let (bsk, input_lwe_secret_key, output_lwe_secret_key, _) = shared;
 
-    assert!(check_content_respects_mod(&**bsk, ciphertext_modulus));
+    assert!(check_content_respects_mod(&*bsk, ciphertext_modulus));
 
     while msg != Scalar::ZERO {
         msg = msg.wrapping_sub(Scalar::ONE);
@@ -361,7 +351,7 @@ fn lwe_encrypt_std_multi_bit_pbs_decrypt_custom_mod<
             let plaintext = Plaintext(msg * delta);
 
             let lwe_ciphertext_in = allocate_and_encrypt_new_lwe_ciphertext(
-                input_lwe_secret_key,
+                &input_lwe_secret_key,
                 plaintext,
                 lwe_modular_std_dev,
                 ciphertext_modulus,
@@ -383,13 +373,13 @@ fn lwe_encrypt_std_multi_bit_pbs_decrypt_custom_mod<
                 &lwe_ciphertext_in,
                 &mut out_pbs_ct,
                 &accumulator,
-                bsk,
+                &bsk,
                 thread_count,
             );
 
             assert!(check_content_respects_mod(&out_pbs_ct, ciphertext_modulus));
 
-            let decrypted = decrypt_lwe_ciphertext(output_lwe_secret_key, &out_pbs_ct);
+            let decrypted = decrypt_lwe_ciphertext(&output_lwe_secret_key, &out_pbs_ct);
 
             let decoded = round_decode(decrypted.0, delta) % msg_modulus;
 
@@ -408,7 +398,7 @@ fn std_lwe_encrypt_multi_bit_deterministic_pbs_decrypt_custom_mod<
         + Serialize
         + DeserializeOwned,
 >(
-    params: MultiBitParams<Scalar>,
+    params: MultiBitTestParams<Scalar>,
 ) {
     let lwe_modular_std_dev = params.lwe_modular_std_dev;
     let ciphertext_modulus = params.ciphertext_modulus;
@@ -441,18 +431,15 @@ fn std_lwe_encrypt_multi_bit_deterministic_pbs_decrypt_custom_mod<
 
     assert!(check_content_respects_mod(&accumulator, ciphertext_modulus));
 
-    let keys_gen = |_| generate_keys(params, &mut rsc);
+    let mut keys_gen = |_| generate_keys(params, &mut rsc);
 
-    let shared = KEY_CACHE
-        .get_multi_bit_key_with_closure::<_, MultiBitParams<Scalar>, Scalar>(params, keys_gen);
-
-    let (bsk, input_lwe_secret_key, output_lwe_secret_key) = (
-        shared.bootstrap_key(),
-        shared.input_key(),
-        shared.output_key(),
+    let shared = gen_keys_or_get_from_cache_if_enabled::<MultiBitBootstrapKeys<Scalar>, _, Scalar>(
+        params,
+        &mut keys_gen,
     );
+    let (bsk, input_lwe_secret_key, output_lwe_secret_key, _) = shared;
 
-    assert!(check_content_respects_mod(&**bsk, ciphertext_modulus));
+    assert!(check_content_respects_mod(&*bsk, ciphertext_modulus));
 
     while msg != Scalar::ZERO {
         msg = msg.wrapping_sub(Scalar::ONE);
@@ -460,7 +447,7 @@ fn std_lwe_encrypt_multi_bit_deterministic_pbs_decrypt_custom_mod<
             let plaintext = Plaintext(msg * delta);
 
             let lwe_ciphertext_in = allocate_and_encrypt_new_lwe_ciphertext(
-                input_lwe_secret_key,
+                &input_lwe_secret_key,
                 plaintext,
                 lwe_modular_std_dev,
                 ciphertext_modulus,
@@ -483,13 +470,13 @@ fn std_lwe_encrypt_multi_bit_deterministic_pbs_decrypt_custom_mod<
                     &lwe_ciphertext_in,
                     &mut out_pbs_ct,
                     &accumulator,
-                    bsk,
+                    &bsk,
                     thread_count,
                 );
 
                 assert!(check_content_respects_mod(&out_pbs_ct, ciphertext_modulus));
 
-                let decrypted = decrypt_lwe_ciphertext(output_lwe_secret_key, &out_pbs_ct);
+                let decrypted = decrypt_lwe_ciphertext(&output_lwe_secret_key, &out_pbs_ct);
 
                 let decoded = round_decode(decrypted.0, delta) % msg_modulus;
 
@@ -509,7 +496,7 @@ fn std_lwe_encrypt_multi_bit_deterministic_pbs_decrypt_custom_mod<
                     &lwe_ciphertext_in,
                     &mut out_pbs_ct,
                     &accumulator,
-                    bsk,
+                    &bsk,
                     thread_count,
                 );
 
@@ -523,7 +510,7 @@ fn std_lwe_encrypt_multi_bit_deterministic_pbs_decrypt_custom_mod<
 
 // DISCLAIMER: these toy example parameters are not guaranteed to be secure or yield
 // correct computations
-const MULTI_BIT_2_2_2_PARAMS: MultiBitParams<u64> = MultiBitParams {
+const MULTI_BIT_2_2_2_PARAMS: MultiBitTestParams<u64> = MultiBitTestParams {
     input_lwe_dimension: LweDimension(818),
     lwe_modular_std_dev: StandardDev(0.000002226459789930014),
     decomp_base_log: DecompositionBaseLog(22),
@@ -537,7 +524,7 @@ const MULTI_BIT_2_2_2_PARAMS: MultiBitParams<u64> = MultiBitParams {
     thread_count: ThreadCount(5),
 };
 
-const MULTI_BIT_2_2_3_PARAMS: MultiBitParams<u64> = MultiBitParams {
+const MULTI_BIT_2_2_3_PARAMS: MultiBitTestParams<u64> = MultiBitTestParams {
     input_lwe_dimension: LweDimension(888),
     lwe_modular_std_dev: StandardDev(0.0000006125031601933181),
     decomp_base_log: DecompositionBaseLog(21),
@@ -553,7 +540,7 @@ const MULTI_BIT_2_2_3_PARAMS: MultiBitParams<u64> = MultiBitParams {
 
 #[test]
 pub fn test_lwe_encrypt_multi_bit_pbs_decrypt_factor_2_thread_5_native_mod() {
-    lwe_encrypt_multi_bit_pbs_decrypt_custom_mod::<u64>(MultiBitParams {
+    lwe_encrypt_multi_bit_pbs_decrypt_custom_mod::<u64>(MultiBitTestParams {
         thread_count: ThreadCount(5),
         ..MULTI_BIT_2_2_2_PARAMS
     });
@@ -561,7 +548,7 @@ pub fn test_lwe_encrypt_multi_bit_pbs_decrypt_factor_2_thread_5_native_mod() {
 
 #[test]
 pub fn test_lwe_encrypt_multi_bit_pbs_decrypt_factor_3_thread_12_native_mod() {
-    lwe_encrypt_multi_bit_pbs_decrypt_custom_mod::<u64>(MultiBitParams {
+    lwe_encrypt_multi_bit_pbs_decrypt_custom_mod::<u64>(MultiBitTestParams {
         thread_count: ThreadCount(12),
         ..MULTI_BIT_2_2_3_PARAMS
     });
@@ -569,7 +556,7 @@ pub fn test_lwe_encrypt_multi_bit_pbs_decrypt_factor_3_thread_12_native_mod() {
 
 #[test]
 pub fn test_lwe_encrypt_multi_bit_pbs_decrypt_factor_2_thread_5_custom_mod() {
-    lwe_encrypt_multi_bit_pbs_decrypt_custom_mod::<u64>(MultiBitParams {
+    lwe_encrypt_multi_bit_pbs_decrypt_custom_mod::<u64>(MultiBitTestParams {
         thread_count: ThreadCount(5),
         message_modulus_log: CiphertextModulusLog(3),
         ciphertext_modulus: CiphertextModulus::try_new_power_of_2(63).unwrap(),
@@ -579,7 +566,7 @@ pub fn test_lwe_encrypt_multi_bit_pbs_decrypt_factor_2_thread_5_custom_mod() {
 
 #[test]
 pub fn test_lwe_encrypt_multi_bit_pbs_decrypt_factor_3_thread_12_custom_mod() {
-    lwe_encrypt_multi_bit_pbs_decrypt_custom_mod::<u64>(MultiBitParams {
+    lwe_encrypt_multi_bit_pbs_decrypt_custom_mod::<u64>(MultiBitTestParams {
         thread_count: ThreadCount(12),
         message_modulus_log: CiphertextModulusLog(3),
         ciphertext_modulus: CiphertextModulus::try_new_power_of_2(63).unwrap(),
@@ -589,7 +576,7 @@ pub fn test_lwe_encrypt_multi_bit_pbs_decrypt_factor_3_thread_12_custom_mod() {
 
 #[test]
 pub fn test_lwe_encrypt_multi_bit_deterministic_pbs_decrypt_factor_2_thread_5_native_mod() {
-    lwe_encrypt_multi_bit_deterministic_pbs_decrypt_custom_mod::<u64>(MultiBitParams {
+    lwe_encrypt_multi_bit_deterministic_pbs_decrypt_custom_mod::<u64>(MultiBitTestParams {
         thread_count: ThreadCount(5),
         ..MULTI_BIT_2_2_2_PARAMS
     });
@@ -597,7 +584,7 @@ pub fn test_lwe_encrypt_multi_bit_deterministic_pbs_decrypt_factor_2_thread_5_na
 
 #[test]
 pub fn test_lwe_encrypt_multi_bit_deterministic_pbs_decrypt_factor_3_thread_12_native_mod() {
-    lwe_encrypt_multi_bit_deterministic_pbs_decrypt_custom_mod::<u64>(MultiBitParams {
+    lwe_encrypt_multi_bit_deterministic_pbs_decrypt_custom_mod::<u64>(MultiBitTestParams {
         thread_count: ThreadCount(12),
         ..MULTI_BIT_2_2_3_PARAMS
     });
@@ -605,7 +592,7 @@ pub fn test_lwe_encrypt_multi_bit_deterministic_pbs_decrypt_factor_3_thread_12_n
 
 #[test]
 pub fn test_lwe_encrypt_multi_bit_deterministic_pbs_decrypt_factor_2_thread_5_custom_mod() {
-    lwe_encrypt_multi_bit_deterministic_pbs_decrypt_custom_mod::<u64>(MultiBitParams {
+    lwe_encrypt_multi_bit_deterministic_pbs_decrypt_custom_mod::<u64>(MultiBitTestParams {
         thread_count: ThreadCount(5),
         message_modulus_log: CiphertextModulusLog(3),
         ciphertext_modulus: CiphertextModulus::try_new_power_of_2(63).unwrap(),
@@ -615,7 +602,7 @@ pub fn test_lwe_encrypt_multi_bit_deterministic_pbs_decrypt_factor_2_thread_5_cu
 
 #[test]
 pub fn test_lwe_encrypt_multi_bit_deterministic_pbs_decrypt_factor_3_thread_12_custom_mod() {
-    lwe_encrypt_multi_bit_deterministic_pbs_decrypt_custom_mod::<u64>(MultiBitParams {
+    lwe_encrypt_multi_bit_deterministic_pbs_decrypt_custom_mod::<u64>(MultiBitTestParams {
         thread_count: ThreadCount(12),
         message_modulus_log: CiphertextModulusLog(3),
         ciphertext_modulus: CiphertextModulus::try_new_power_of_2(63).unwrap(),
@@ -625,7 +612,7 @@ pub fn test_lwe_encrypt_multi_bit_deterministic_pbs_decrypt_factor_3_thread_12_c
 
 #[test]
 pub fn test_lwe_encrypt_std_multi_bit_pbs_decrypt_factor_2_thread_5_native_mod() {
-    lwe_encrypt_std_multi_bit_pbs_decrypt_custom_mod::<u64>(MultiBitParams {
+    lwe_encrypt_std_multi_bit_pbs_decrypt_custom_mod::<u64>(MultiBitTestParams {
         thread_count: ThreadCount(5),
         ..MULTI_BIT_2_2_2_PARAMS
     });
@@ -633,7 +620,7 @@ pub fn test_lwe_encrypt_std_multi_bit_pbs_decrypt_factor_2_thread_5_native_mod()
 
 #[test]
 pub fn test_lwe_encrypt_std_multi_bit_pbs_decrypt_factor_3_thread_12_native_mod() {
-    lwe_encrypt_std_multi_bit_pbs_decrypt_custom_mod::<u64>(MultiBitParams {
+    lwe_encrypt_std_multi_bit_pbs_decrypt_custom_mod::<u64>(MultiBitTestParams {
         thread_count: ThreadCount(12),
         ..MULTI_BIT_2_2_3_PARAMS
     });
@@ -641,7 +628,7 @@ pub fn test_lwe_encrypt_std_multi_bit_pbs_decrypt_factor_3_thread_12_native_mod(
 
 #[test]
 pub fn test_lwe_encrypt_std_multi_bit_pbs_decrypt_factor_2_thread_5_custom_mod() {
-    lwe_encrypt_std_multi_bit_pbs_decrypt_custom_mod::<u64>(MultiBitParams {
+    lwe_encrypt_std_multi_bit_pbs_decrypt_custom_mod::<u64>(MultiBitTestParams {
         thread_count: ThreadCount(5),
         message_modulus_log: CiphertextModulusLog(3),
         ciphertext_modulus: CiphertextModulus::try_new_power_of_2(63).unwrap(),
@@ -651,7 +638,7 @@ pub fn test_lwe_encrypt_std_multi_bit_pbs_decrypt_factor_2_thread_5_custom_mod()
 
 #[test]
 pub fn test_lwe_encrypt_std_multi_bit_pbs_decrypt_factor_3_thread_12_custom_mod() {
-    lwe_encrypt_std_multi_bit_pbs_decrypt_custom_mod::<u64>(MultiBitParams {
+    lwe_encrypt_std_multi_bit_pbs_decrypt_custom_mod::<u64>(MultiBitTestParams {
         thread_count: ThreadCount(12),
         message_modulus_log: CiphertextModulusLog(3),
         ciphertext_modulus: CiphertextModulus::try_new_power_of_2(63).unwrap(),
@@ -661,7 +648,7 @@ pub fn test_lwe_encrypt_std_multi_bit_pbs_decrypt_factor_3_thread_12_custom_mod(
 
 #[test]
 pub fn std_test_lwe_encrypt_multi_bit_deterministic_pbs_decrypt_factor_2_thread_5_native_mod() {
-    std_lwe_encrypt_multi_bit_deterministic_pbs_decrypt_custom_mod::<u64>(MultiBitParams {
+    std_lwe_encrypt_multi_bit_deterministic_pbs_decrypt_custom_mod::<u64>(MultiBitTestParams {
         thread_count: ThreadCount(5),
         ..MULTI_BIT_2_2_2_PARAMS
     });
@@ -669,7 +656,7 @@ pub fn std_test_lwe_encrypt_multi_bit_deterministic_pbs_decrypt_factor_2_thread_
 
 #[test]
 pub fn std_test_lwe_encrypt_multi_bit_deterministic_pbs_decrypt_factor_3_thread_12_native_mod() {
-    std_lwe_encrypt_multi_bit_deterministic_pbs_decrypt_custom_mod::<u64>(MultiBitParams {
+    std_lwe_encrypt_multi_bit_deterministic_pbs_decrypt_custom_mod::<u64>(MultiBitTestParams {
         thread_count: ThreadCount(12),
         ..MULTI_BIT_2_2_3_PARAMS
     });
@@ -677,7 +664,7 @@ pub fn std_test_lwe_encrypt_multi_bit_deterministic_pbs_decrypt_factor_3_thread_
 
 #[test]
 pub fn std_test_lwe_encrypt_multi_bit_deterministic_pbs_decrypt_factor_2_thread_5_custom_mod() {
-    std_lwe_encrypt_multi_bit_deterministic_pbs_decrypt_custom_mod::<u64>(MultiBitParams {
+    std_lwe_encrypt_multi_bit_deterministic_pbs_decrypt_custom_mod::<u64>(MultiBitTestParams {
         thread_count: ThreadCount(5),
         message_modulus_log: CiphertextModulusLog(3),
         ciphertext_modulus: CiphertextModulus::try_new_power_of_2(63).unwrap(),
@@ -687,7 +674,7 @@ pub fn std_test_lwe_encrypt_multi_bit_deterministic_pbs_decrypt_factor_2_thread_
 
 #[test]
 pub fn std_test_lwe_encrypt_multi_bit_deterministic_pbs_decrypt_factor_3_thread_12_custom_mod() {
-    std_lwe_encrypt_multi_bit_deterministic_pbs_decrypt_custom_mod::<u64>(MultiBitParams {
+    std_lwe_encrypt_multi_bit_deterministic_pbs_decrypt_custom_mod::<u64>(MultiBitTestParams {
         thread_count: ThreadCount(12),
         message_modulus_log: CiphertextModulusLog(3),
         ciphertext_modulus: CiphertextModulus::try_new_power_of_2(63).unwrap(),
