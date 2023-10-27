@@ -166,17 +166,22 @@ impl<Scalar: UnsignedInteger + Serialize + DeserializeOwned> KeyCacheAccess
     type Keys = MultiBitBootstrapKeys<Scalar>;
 
     fn access(keycache: &KeyCache) -> &KeyCacheCoreImpl<Self, Self::Keys> {
-        use std::any::TypeId;
+        use std::any::Any;
 
-        let scalar_type_id = TypeId::of::<Scalar>();
+        let scalar_representant = Scalar::ZERO;
+        let scalar_as_any = &scalar_representant as &dyn Any;
 
-        if scalar_type_id == TypeId::of::<u32>() {
-            unsafe { std::mem::transmute(&keycache.u32_multi_bit_cache) }
-        } else if scalar_type_id == TypeId::of::<u64>() {
-            unsafe { std::mem::transmute(&keycache.u64_multi_bit_cache) }
-        } else {
-            panic!("No keycache for given Scalar type")
+        match scalar_as_any.downcast_ref::<u32>() {
+            Some(_) => return unsafe { std::mem::transmute(&keycache.u32_multi_bit_cache) },
+            _ => (),
         }
+
+        match scalar_as_any.downcast_ref::<u64>() {
+            Some(_) => return unsafe { std::mem::transmute(&keycache.u64_multi_bit_cache) },
+            _ => (),
+        }
+
+        panic!("No keycache for given Scalar type")
     }
 }
 
