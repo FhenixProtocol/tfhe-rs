@@ -212,7 +212,7 @@ where
         }
         #[cfg(not(feature = "internal-keycache"))]
         {
-            crate::integer::ServerKey::new(client_key)
+            crate::integer::ServerKey::new_radix_server_key(client_key)
         }
     }
 

@@ -61,7 +61,7 @@ impl ServerKey {
     /// // Generate the server key:
     /// let sks = ServerKey::new(&cks);
     /// ```
-    pub fn new<C>(cks: C) -> ServerKey
+    pub fn new_radix_server_key<C>(cks: C) -> ServerKey
     where
         C: AsRef<ClientKey>,
     {
@@ -73,6 +73,17 @@ impl ServerKey {
             &client_key.key,
             max_degree,
         );
+
+        ServerKey { key: sks }
+    }
+
+    pub fn new_crt_server_key<C>(cks: C) -> ServerKey
+    where
+        C: AsRef<ClientKey>,
+    {
+        let client_key = cks.as_ref();
+        // Use default shortint max degree
+        let sks = crate::shortint::server_key::ServerKey::new(&client_key.key);
 
         ServerKey { key: sks }
     }
@@ -151,7 +162,7 @@ mod test {
         // msg_mod = 4, carry_mod = 4, (msg_mod * carry_mod - 1) - (carry_mod - 1) = 12
         let expected_max_degree = MaxDegree(12);
 
-        let sks = ServerKey::new(&cks);
+        let sks = ServerKey::new_radix_server_key(&cks);
         assert_eq!(sks.key.max_degree, expected_max_degree);
 
         let csks = CompressedServerKey::new(&cks);

@@ -1,6 +1,6 @@
 use rand::Rng;
 
-use crate::integer::{gen_keys, CompressedPublicKey, PublicKey};
+use crate::integer::{gen_keys, CompressedPublicKey, IntegerKeyKind, PublicKey};
 use crate::shortint::parameters::*;
 use crate::shortint::ClassicPBSParameters;
 
@@ -78,7 +78,7 @@ fn small_radix_encrypt_decrypt_compact_128_bits_list(params: ClassicPBSParameter
 }
 
 fn radix_encrypt_decrypt_compact_128_bits_list(params: ClassicPBSParameters) {
-    let (cks, _) = gen_keys(params);
+    let (cks, _) = gen_keys(params, IntegerKeyKind::Radix);
     let pk = crate::integer::public_key::CompactPublicKey::new(&cks);
 
     let mut rng = rand::thread_rng();
