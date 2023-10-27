@@ -75,12 +75,19 @@ impl<Scalar: UnsignedInteger> NamedParam for TestParams<Scalar> {
     }
 }
 
-pub struct KeyCacheCoreImpl<Scalar: UnsignedInteger> {
-    // inner: ImplKeyCache<MultiBitTestParams<Scalar>, MultiBitBootstrapKeys<Scalar>, FileStorage>,
-    inner: ImplKeyCache<TestParams<Scalar>, BootstrapKeys<Scalar>, FileStorage>,
+pub struct KeyCacheCoreImpl<P, K>
+where
+    P: Copy + NamedParam + DeserializeOwned + Serialize + PartialEq,
+    K: DeserializeOwned + Serialize,
+{
+    inner: ImplKeyCache<P, K, FileStorage>,
 }
 
-impl<Scalar: UnsignedInteger> Default for KeyCacheCoreImpl<Scalar> {
+impl<
+        P: Copy + NamedParam + DeserializeOwned + Serialize + PartialEq,
+        K: DeserializeOwned + Serialize,
+    > Default for KeyCacheCoreImpl<P, K>
+{
     fn default() -> Self {
         Self {
             inner: ImplKeyCache::new(FileStorage::new(
@@ -110,54 +117,19 @@ enum BootstrapKeys<Scalar: UnsignedInteger> {
     MultiBit(MultiBitBootstrapKeys<Scalar>),
 }
 
-pub struct SharedMultiBitBootstrapKey<Scalar: UnsignedInteger> {
-    // inner: GenericSharedKey<MultiBitBootstrapKeys<Scalar>>,
-    inner: GenericSharedKey<BootstrapKeys<Scalar>>,
-}
-
-impl<Scalar: UnsignedInteger> SharedMultiBitBootstrapKey<Scalar> {
-    pub fn bootstrap_key(&self) -> &LweMultiBitBootstrapKeyOwned<Scalar> {
-        &self.inner.0
-    }
-    pub fn input_key(&self) -> &LweSecretKey<Vec<Scalar>> {
-        &self.inner.1
-    }
-    pub fn output_key(&self) -> &LweSecretKey<Vec<Scalar>> {
-        &self.inner.2
-    }
-    pub fn fourier_bootstrap_key(&self) -> &FourierLweMultiBitBootstrapKeyOwned {
-        &self.inner.3
-    }
-    pub fn clone_into_owned(&self) -> MultiBitBootstrapKeys<Scalar> {
-        (
-            self.bootstrap_key().clone(),
-            self.input_key().clone(),
-            self.output_key().clone(),
-            self.fourier_bootstrap_key().clone(),
-        )
-    }
-}
-
 // TODO Est-ce que je peux rendre le Keycache générique sur P(arams) et K(eys)
 // Cela signifie de laisser faire la closure pour déterminer les types à manipuler.
 // Essayer de le faire avec le multi-bit pour voir si l'approche est viable.
-impl<
-        Scalar: UnsignedInteger + UnsignedInteger + CastFrom<usize> + Serialize + DeserializeOwned,
-    > KeyCacheCoreImpl<Scalar>
+impl<P, K> KeyCacheCoreImpl<P, K>
+where
+    P: Copy + NamedParam + DeserializeOwned + Serialize + PartialEq,
+    K: DeserializeOwned + Serialize + Clone,
 {
-    pub fn get_multi_bit_key_with_closure<C>(
-        &self,
-        // params: MultiBitTestParams<Scalar>,
-        params: TestParams<Scalar>,
-        mut c: C,
-    ) -> SharedMultiBitBootstrapKey<Scalar>
+    pub fn get_key_with_closure<C>(&self, params: P, mut c: C) -> K
     where
-        // C: FnMut(MultiBitTestParams<Scalar>) -> MultiBitBootstrapKeys<Scalar>,
-        C: FnMut(TestParams<Scalar>) -> BootstrapKeys<Scalar>,
+        C: FnMut(P) -> K,
     {
-        SharedMultiBitBootstrapKey {
-            inner: self.inner.get_with_closure(params, &mut c),
-        }
+        (*self.inner.get_with_closure(params, &mut c)).clone()
     }
 
     pub fn clear_in_memory_cache(&self) {
@@ -167,43 +139,44 @@ impl<
 
 #[derive(Default)]
 pub struct KeyCache {
-    u32_cache: KeyCacheCoreImpl<u32>,
-    u64_cache: KeyCacheCoreImpl<u64>,
+    u32_multi_bit_cache: KeyCacheCoreImpl<MultiBitTestParams<u32>, MultiBitBootstrapKeys<u32>>,
+    u64_multi_bit_cache: KeyCacheCoreImpl<MultiBitTestParams<u64>, MultiBitBootstrapKeys<u64>>,
 }
 
 impl KeyCache {
-    pub fn get_multi_bit_key_with_closure<C, P, Scalar>(
-        &self,
-        // params: MultiBitTestParams<Scalar>,
-        params: TestParams<Scalar>,
-        c: C,
-    ) -> SharedMultiBitBootstrapKey<Scalar>
+    pub fn get_key_with_closure<C, P, K>(&self, params: P, c: C) -> K
     where
-        // C: FnMut(MultiBitTestParams<Scalar>) -> MultiBitBootstrapKeys<Scalar>,
-        C: FnMut(TestParams<Scalar>) -> BootstrapKeys<Scalar>,
-        Scalar: UnsignedInteger
-            + CastFrom<usize>
-            + KeyCacheAccess
-            + Serialize
-            + DeserializeOwned,
+        C: FnMut(P) -> K,
+        P: KeyCacheAccess<Keys = K> + Serialize + DeserializeOwned + Copy + PartialEq + NamedParam,
+        K: DeserializeOwned + Serialize + Clone,
     {
-        Scalar::access(self).get_multi_bit_key_with_closure(params, c)
+        P::access(self).get_key_with_closure(params, c)
     }
 }
 
-pub trait KeyCacheAccess: Sized + UnsignedInteger {
-    fn access(keycache: &KeyCache) -> &KeyCacheCoreImpl<Self>;
+pub trait KeyCacheAccess: Serialize + DeserializeOwned + Copy + PartialEq + NamedParam {
+    type Keys: DeserializeOwned + Serialize;
+
+    fn access(keycache: &KeyCache) -> &KeyCacheCoreImpl<Self, Self::Keys>;
 }
 
-impl KeyCacheAccess for u32 {
-    fn access(keycache: &KeyCache) -> &KeyCacheCoreImpl<Self> {
-        &keycache.u32_cache
-    }
-}
+impl<Scalar: UnsignedInteger + Serialize + DeserializeOwned> KeyCacheAccess
+    for MultiBitTestParams<Scalar>
+{
+    type Keys = MultiBitBootstrapKeys<Scalar>;
 
-impl KeyCacheAccess for u64 {
-    fn access(keycache: &KeyCache) -> &KeyCacheCoreImpl<Self> {
-        &keycache.u64_cache
+    fn access(keycache: &KeyCache) -> &KeyCacheCoreImpl<Self, Self::Keys> {
+        use std::any::TypeId;
+
+        let scalar_type_id = TypeId::of::<Scalar>();
+
+        if scalar_type_id == TypeId::of::<u32>() {
+            unsafe { std::mem::transmute(&keycache.u32_multi_bit_cache) }
+        } else if scalar_type_id == TypeId::of::<u64>() {
+            unsafe { std::mem::transmute(&keycache.u64_multi_bit_cache) }
+        } else {
+            panic!("No keycache for given Scalar type")
+        }
     }
 }
 

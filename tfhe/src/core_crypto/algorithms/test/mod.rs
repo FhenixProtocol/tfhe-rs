@@ -205,28 +205,18 @@ where
     )
 }
 
-pub(crate) fn gen_keys_or_get_from_cache_if_enabled<K, P: Debug, Scalar>(
+use crate::core_crypto::keycache::KeyCacheAccess;
+
+pub(crate) fn gen_keys_or_get_from_cache_if_enabled<
+    P: Debug + KeyCacheAccess<Keys = K> + serde::Serialize + serde::de::DeserializeOwned,
+    K: serde::de::DeserializeOwned + serde::Serialize + Clone,
+>(
     params: P,
     keygen_func: &mut dyn FnMut(P) -> K,
 ) -> K {
     #[cfg(feature = "internal-keycache")]
     {
-        use crate::core_crypto::keycache::{MultiBitTestParams, KEY_CACHE};
-        use std::any::TypeId;
-
-        let params_type_id = TypeId::of::<(P, K)>();
-        match params_type_id {
-            TypeId::of::<MultiBitTestParams<Scalar>>() => KEY_CACHE
-                .get_multi_bit_key_with_closure(params, keygen_func)
-                .clone_into_owned(),
-            _ => {
-                println!(
-                    "[Warning]There is no keycache for type of params {:?}",
-                    params
-                );
-                keygen_func(params)
-            }
-        }
+        crate::core_crypto::keycache::KEY_CACHE.get_key_with_closure(params, keygen_func)
     }
     #[cfg(not(feature = "internal-keycache"))]
     {

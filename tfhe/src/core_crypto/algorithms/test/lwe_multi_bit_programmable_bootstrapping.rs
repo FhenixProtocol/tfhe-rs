@@ -1,7 +1,6 @@
 use super::*;
 use crate::core_crypto::keycache::{
-    KeyCacheAccess, MultiBitBootstrapKeys, MultiBitTestParams, SharedMultiBitBootstrapKey,
-    KEY_CACHE,
+    KeyCacheAccess, MultiBitBootstrapKeys, MultiBitTestParams, KEY_CACHE,
 };
 use serde::de::DeserializeOwned;
 use serde::Serialize;
@@ -17,14 +16,7 @@ const NB_TESTS: usize = 1;
 const NB_TESTS_LIGHT: usize = 1;
 
 fn generate_keys<
-    Scalar: UnsignedTorus
-        + Sync
-        + Send
-        + CastFrom<usize>
-        + CastInto<usize>
-        + KeyCacheAccess
-        + Serialize
-        + DeserializeOwned,
+    Scalar: UnsignedTorus + Sync + Send + CastFrom<usize> + CastInto<usize> + Serialize + DeserializeOwned,
 >(
     params: MultiBitTestParams<Scalar>,
     rsc: &mut TestResources,
@@ -77,14 +69,7 @@ fn generate_keys<
 }
 
 fn lwe_encrypt_multi_bit_pbs_decrypt_custom_mod<
-    Scalar: UnsignedTorus
-        + Sync
-        + Send
-        + CastFrom<usize>
-        + CastInto<usize>
-        + KeyCacheAccess
-        + Serialize
-        + DeserializeOwned,
+    Scalar: UnsignedTorus + Sync + Send + CastFrom<usize> + CastInto<usize> + Serialize + DeserializeOwned,
 >(
     params: MultiBitTestParams<Scalar>,
 ) {
@@ -121,10 +106,7 @@ fn lwe_encrypt_multi_bit_pbs_decrypt_custom_mod<
 
     let mut keys_gen = |_| generate_keys(params, &mut rsc);
 
-    let shared = gen_keys_or_get_from_cache_if_enabled::<MultiBitBootstrapKeys<Scalar>, _, Scalar>(
-        params,
-        &mut keys_gen,
-    );
+    let shared = gen_keys_or_get_from_cache_if_enabled(params, &mut keys_gen);
     let (bsk, input_lwe_secret_key, output_lwe_secret_key, fbsk) = shared;
 
     assert!(check_content_respects_mod(&*bsk, ciphertext_modulus));
@@ -173,14 +155,7 @@ fn lwe_encrypt_multi_bit_pbs_decrypt_custom_mod<
 }
 
 fn lwe_encrypt_multi_bit_deterministic_pbs_decrypt_custom_mod<
-    Scalar: UnsignedTorus
-        + Sync
-        + Send
-        + CastFrom<usize>
-        + CastInto<usize>
-        + KeyCacheAccess
-        + Serialize
-        + DeserializeOwned,
+    Scalar: UnsignedTorus + Sync + Send + CastFrom<usize> + CastInto<usize> + Serialize + DeserializeOwned,
 >(
     params: MultiBitTestParams<Scalar>,
 ) {
@@ -217,10 +192,7 @@ fn lwe_encrypt_multi_bit_deterministic_pbs_decrypt_custom_mod<
 
     let mut keys_gen = |_| generate_keys(params, &mut rsc);
 
-    let shared = gen_keys_or_get_from_cache_if_enabled::<MultiBitBootstrapKeys<Scalar>, _, Scalar>(
-        params,
-        &mut keys_gen,
-    );
+    let shared = gen_keys_or_get_from_cache_if_enabled(params, &mut keys_gen);
     let (bsk, input_lwe_secret_key, output_lwe_secret_key, fbsk) = shared;
 
     assert!(check_content_respects_mod(&*bsk, ciphertext_modulus));
@@ -293,14 +265,7 @@ fn lwe_encrypt_multi_bit_deterministic_pbs_decrypt_custom_mod<
 }
 
 fn lwe_encrypt_std_multi_bit_pbs_decrypt_custom_mod<
-    Scalar: UnsignedTorus
-        + Sync
-        + Send
-        + CastFrom<usize>
-        + CastInto<usize>
-        + KeyCacheAccess
-        + Serialize
-        + DeserializeOwned,
+    Scalar: UnsignedTorus + Sync + Send + CastFrom<usize> + CastInto<usize> + Serialize + DeserializeOwned,
 >(
     params: MultiBitTestParams<Scalar>,
 ) {
@@ -337,10 +302,7 @@ fn lwe_encrypt_std_multi_bit_pbs_decrypt_custom_mod<
 
     let mut keys_gen = |_| generate_keys(params, &mut rsc);
 
-    let shared = gen_keys_or_get_from_cache_if_enabled::<MultiBitBootstrapKeys<Scalar>, _, Scalar>(
-        params,
-        &mut keys_gen,
-    );
+    let shared = gen_keys_or_get_from_cache_if_enabled(params, &mut keys_gen);
     let (bsk, input_lwe_secret_key, output_lwe_secret_key, _) = shared;
 
     assert!(check_content_respects_mod(&*bsk, ciphertext_modulus));
@@ -389,14 +351,7 @@ fn lwe_encrypt_std_multi_bit_pbs_decrypt_custom_mod<
 }
 
 fn std_lwe_encrypt_multi_bit_deterministic_pbs_decrypt_custom_mod<
-    Scalar: UnsignedTorus
-        + Sync
-        + Send
-        + CastFrom<usize>
-        + CastInto<usize>
-        + KeyCacheAccess
-        + Serialize
-        + DeserializeOwned,
+    Scalar: UnsignedTorus + Sync + Send + CastFrom<usize> + CastInto<usize> + Serialize + DeserializeOwned,
 >(
     params: MultiBitTestParams<Scalar>,
 ) {
@@ -433,10 +388,7 @@ fn std_lwe_encrypt_multi_bit_deterministic_pbs_decrypt_custom_mod<
 
     let mut keys_gen = |_| generate_keys(params, &mut rsc);
 
-    let shared = gen_keys_or_get_from_cache_if_enabled::<MultiBitBootstrapKeys<Scalar>, _, Scalar>(
-        params,
-        &mut keys_gen,
-    );
+    let shared = gen_keys_or_get_from_cache_if_enabled(params, &mut keys_gen);
     let (bsk, input_lwe_secret_key, output_lwe_secret_key, _) = shared;
 
     assert!(check_content_respects_mod(&*bsk, ciphertext_modulus));
