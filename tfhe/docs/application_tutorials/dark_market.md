@@ -348,7 +348,7 @@ fn fill_orders(total_orders: u16, orders: &mut [u16], prefix_sum_arr: &[u16]) {
 };
 ```
 
-To write this new function we need transform the conditional code into a mathematical expression since FHE does not support conditional operations.
+To write this new function we need to transform the conditional code into a mathematical expression since FHE does not support conditional operations.
 ```rust
 
 fn fill_orders(total_orders: u16, orders: &mut [u16], prefix_sum_arr: &[u16]) {
