@@ -409,7 +409,7 @@ memory usage of our PME, etc.).
 
 The first optimization involved delaying the execution of FHE operations to _after_
 the generation of all possible execution paths to be considered. This optimization 
-allows us to prune execution paths during execution path construction that are provably 
+allows us to prune execution paths during execution path construction that are probably 
 going to result in an encrypted false value, without having already performed the FHE 
 operations up to the point of pruning. Consider the regex `/^a+b$/`, and we are applying 
 this to a content of size 4. If we are executing execution paths naively, we would go ahead 
