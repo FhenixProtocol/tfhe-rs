@@ -30,7 +30,7 @@ fn main() {
 }
 ```
 
-In this representation, the correctness of operations requires the carries to be propagated throughout the ciphertext. This operation is costly, since it relies on the computation of many programmable bootstrapping operations over shortints.
+In this representation, the correctness of operations requires the carriers to be propagated throughout the ciphertext. This operation is costly, since it relies on the computation of many programmable bootstrapping operations over shortints.
 
 ### CRT-based integers.
 

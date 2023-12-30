@@ -80,7 +80,7 @@ fn sha256(padded_input: Vec<bool>) -> [bool; 256] {
     for chunk in chunks {
         let mut w = [[false; 32]; 64];
 
-        // Copy first 16 words from current chunk
+        // Copy the first 16 words from the current chunk
         for i in 0..16 {
             w[i].copy_from_slice(&chunk[i * 32..(i + 1) * 32]);
         }
@@ -222,7 +222,7 @@ Finally, with all these sha256 operations working homomorphically, our functions
 
 If we inspect the main ```sha256_fhe``` function, we will find operations that can be performed in parallel. For instance, within the compression loop, ```temp1``` and ```temp2``` can be computed concurrently. An efficient way to parallelize computations here is using the ```rayon::join()``` function, which uses parallel processing only when there are available CPUs. Recall that the two temporary values in the compression loop are the result of several additions, so we can use nested calls to ```rayon::join()``` to potentially parallelize more operations.
 
-Another way to speed up consecutive additions would be using the Carry Save Adder, a very efficient adder that takes 3 numbers and returns a sum and carry sequence. If our inputs are A, B and C, we can construct a CSA with our previously implemented Maj function and the bitwise XOR operation as follows:
+Another way to speed up consecutive additions would be using the Carry Save Adder, a very efficient adder that takes 3 numbers and returns a sum and carries sequence. If our inputs are A, B and C, we can construct a CSA with our previously implemented Maj function and the bitwise XOR operation as follows:
 
 ```
 Carry = Maj(A, B, C)
