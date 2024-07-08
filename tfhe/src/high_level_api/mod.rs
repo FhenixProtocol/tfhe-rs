@@ -40,8 +40,8 @@ pub use config::{Config, ConfigBuilder};
 pub use global_state::{set_server_key, unset_server_key, with_server_key_as_context};
 
 pub use integers::{
-    CompactFheInt, CompactFheIntList, CompactFheUint, CompactFheUintList, CompressedFheInt,
-    CompressedFheUint, FheInt, FheUint, IntegerId,
+    CompactFheUint, CompactFheUintList,
+    CompressedFheUint, FheUint, IntegerId,
 };
 #[cfg(feature = "gpu")]
 pub use keys::CudaServerKey;
@@ -61,15 +61,13 @@ pub use crate::high_level_api::booleans::{
 pub use crate::high_level_api::booleans::{ProvenCompactFheBool, ProvenCompactFheBoolList};
 expand_pub_use_fhe_type!(
     pub use crate::high_level_api::integers{
-        FheUint2, FheUint4, FheUint6, FheUint8, FheUint10, FheUint12, FheUint14, FheUint16,
+        FheUint8, FheUint16,
         FheUint32, FheUint64, FheUint128, FheUint160, FheUint256,
 
-        FheInt2, FheInt4, FheInt6, FheInt8, FheInt10, FheInt12, FheInt14, FheInt16,
-        FheInt32, FheInt64, FheInt128, FheInt160, FheInt256
     };
 );
 
-pub use safe_serialize::safe_serialize;
+// pub use safe_serialize::safe_serialize;
 
 mod config;
 mod global_state;
@@ -95,19 +93,19 @@ pub enum Device {
     CudaGpu,
 }
 
-pub mod safe_serialize {
-    use crate::named::Named;
-    use serde::Serialize;
-
-    pub fn safe_serialize<T>(
-        a: &T,
-        writer: impl std::io::Write,
-        serialized_size_limit: u64,
-    ) -> Result<(), String>
-    where
-        T: Named + Serialize,
-    {
-        crate::safe_deserialization::safe_serialize(a, writer, serialized_size_limit)
-            .map_err(|err| err.to_string())
-    }
-}
+// pub mod safe_serialize {
+//     use crate::named::Named;
+//     use serde::Serialize;
+//
+//     pub fn safe_serialize<T>(
+//         a: &T,
+//         writer: impl std::io::Write,
+//         serialized_size_limit: u64,
+//     ) -> Result<(), String>
+//     where
+//         T: Named + Serialize,
+//     {
+//         crate::safe_deserialization::safe_serialize(a, writer, serialized_size_limit)
+//             .map_err(|err| err.to_string())
+//     }
+// }

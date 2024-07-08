@@ -401,13 +401,13 @@ macro_rules! generic_integer_impl_scalar_div_rem {
 generic_integer_impl_scalar_div_rem!(
     key_method: scalar_div_rem_parallelized,
     fhe_and_scalar_type:
-        (super::FheUint2, u8),
-        (super::FheUint4, u8),
-        (super::FheUint6, u8),
+        // (super::FheUint2, u8),
+        // (super::FheUint4, u8),
+        // (super::FheUint6, u8),
         (super::FheUint8, u8),
-        (super::FheUint10, u16),
-        (super::FheUint12, u16),
-        (super::FheUint14, u16),
+        // (super::FheUint10, u16),
+        // (super::FheUint12, u16),
+        // (super::FheUint14, u16),
         (super::FheUint16, u16),
         (super::FheUint32, u32),
         (super::FheUint64, u64),
@@ -482,13 +482,13 @@ generic_integer_impl_scalar_operation!(
         }
     },
     fhe_and_scalar_type:
-        (super::FheUint2, u8),
-        (super::FheUint4, u8),
-        (super::FheUint6, u8),
+        // (super::FheUint2, u8),
+        // (super::FheUint4, u8),
+        // (super::FheUint6, u8),
         (super::FheUint8, u8),
-        (super::FheUint10, u16),
-        (super::FheUint12, u16),
-        (super::FheUint14, u16),
+        // (super::FheUint10, u16),
+        // (super::FheUint12, u16),
+        // (super::FheUint14, u16),
         (super::FheUint16, u16),
         (super::FheUint32, u32),
         (super::FheUint64, u64),
@@ -520,13 +520,13 @@ generic_integer_impl_scalar_operation!(
         }
     },
     fhe_and_scalar_type:
-        (super::FheUint2, u8),
-        (super::FheUint4, u8),
-        (super::FheUint6, u8),
+        // (super::FheUint2, u8),
+        // (super::FheUint4, u8),
+        // (super::FheUint6, u8),
         (super::FheUint8, u8),
-        (super::FheUint10, u16),
-        (super::FheUint12, u16),
-        (super::FheUint14, u16),
+        // (super::FheUint10, u16),
+        // (super::FheUint12, u16),
+        // (super::FheUint14, u16),
         (super::FheUint16, u16),
         (super::FheUint32, u32),
         (super::FheUint64, u64),
@@ -558,13 +558,13 @@ generic_integer_impl_scalar_operation!(
         }
     },
     fhe_and_scalar_type:
-        (super::FheUint2, u8),
-        (super::FheUint4, u8),
-        (super::FheUint6, u8),
+        // (super::FheUint2, u8),
+        // (super::FheUint4, u8),
+        // (super::FheUint6, u8),
         (super::FheUint8, u8),
-        (super::FheUint10, u16),
-        (super::FheUint12, u16),
-        (super::FheUint14, u16),
+        // (super::FheUint10, u16),
+        // (super::FheUint12, u16),
+        // (super::FheUint14, u16),
         (super::FheUint16, u16),
         (super::FheUint32, u32),
         (super::FheUint64, u64),
@@ -596,13 +596,13 @@ generic_integer_impl_scalar_operation!(
         }
     },
     fhe_and_scalar_type:
-        (super::FheUint2, u8),
-        (super::FheUint4, u8),
-        (super::FheUint6, u8),
+        // (super::FheUint2, u8),
+        // (super::FheUint4, u8),
+        // (super::FheUint6, u8),
         (super::FheUint8, u8),
-        (super::FheUint10, u16),
-        (super::FheUint12, u16),
-        (super::FheUint14, u16),
+        // (super::FheUint10, u16),
+        // (super::FheUint12, u16),
+        // (super::FheUint14, u16),
         (super::FheUint16, u16),
         (super::FheUint32, u32),
         (super::FheUint64, u64),
@@ -634,13 +634,13 @@ generic_integer_impl_scalar_operation!(
         }
     },
     fhe_and_scalar_type:
-        (super::FheUint2, u8),
-        (super::FheUint4, u8),
-        (super::FheUint6, u8),
+        // (super::FheUint2, u8),
+        // (super::FheUint4, u8),
+        // (super::FheUint6, u8),
         (super::FheUint8, u8),
-        (super::FheUint10, u16),
-        (super::FheUint12, u16),
-        (super::FheUint14, u16),
+        // (super::FheUint10, u16),
+        // (super::FheUint12, u16),
+        // (super::FheUint14, u16),
         (super::FheUint16, u16),
         (super::FheUint32, u32),
         (super::FheUint64, u64),
@@ -673,13 +673,13 @@ generic_integer_impl_scalar_operation!(
         }
     },
     fhe_and_scalar_type:
-        (super::FheUint2, u8),
-        (super::FheUint4, u8),
-        (super::FheUint6, u8),
+        // (super::FheUint2, u8),
+        // (super::FheUint4, u8),
+        // (super::FheUint6, u8),
         (super::FheUint8, u8),
-        (super::FheUint10, u16),
-        (super::FheUint12, u16),
-        (super::FheUint14, u16),
+        // (super::FheUint10, u16),
+        // (super::FheUint12, u16),
+        // (super::FheUint14, u16),
         (super::FheUint16, u16),
         (super::FheUint32, u32),
         (super::FheUint64, u64),
@@ -711,13 +711,13 @@ generic_integer_impl_scalar_operation!(
         }
     },
     fhe_and_scalar_type:
-        (super::FheUint2, u8, u16, u32, u64, u128),
-        (super::FheUint4, u8, u16, u32, u64, u128),
-        (super::FheUint6, u8, u16, u32, u64, u128),
+        // (super::FheUint2, u8, u16, u32, u64, u128),
+        // (super::FheUint4, u8, u16, u32, u64, u128),
+        // (super::FheUint6, u8, u16, u32, u64, u128),
         (super::FheUint8, u8, u16, u32, u64, u128),
-        (super::FheUint10, u8, u16, u32, u64, u128),
-        (super::FheUint12, u8, u16, u32, u64, u128),
-        (super::FheUint14, u8, u16, u32, u64, u128),
+        // (super::FheUint10, u8, u16, u32, u64, u128),
+        // (super::FheUint12, u8, u16, u32, u64, u128),
+        // (super::FheUint14, u8, u16, u32, u64, u128),
         (super::FheUint16, u8, u16, u32, u64, u128),
         (super::FheUint32, u8, u16, u32, u64, u128),
         (super::FheUint64, u8, u16, u32, u64, u128),
@@ -749,13 +749,13 @@ generic_integer_impl_scalar_operation!(
         }
     },
     fhe_and_scalar_type:
-        (super::FheUint2, u8, u16, u32, u64, u128),
-        (super::FheUint4, u8, u16, u32, u64, u128),
-        (super::FheUint6, u8, u16, u32, u64, u128),
+        // (super::FheUint2, u8, u16, u32, u64, u128),
+        // (super::FheUint4, u8, u16, u32, u64, u128),
+        // (super::FheUint6, u8, u16, u32, u64, u128),
         (super::FheUint8, u8, u16, u32, u64, u128),
-        (super::FheUint10, u8, u16, u32, u64, u128),
-        (super::FheUint12, u8, u16, u32, u64, u128),
-        (super::FheUint14, u8, u16, u32, u64, u128),
+        // (super::FheUint10, u8, u16, u32, u64, u128),
+        // (super::FheUint12, u8, u16, u32, u64, u128),
+        // (super::FheUint14, u8, u16, u32, u64, u128),
         (super::FheUint16, u8, u16, u32, u64, u128),
         (super::FheUint32, u8, u16, u32, u64, u128),
         (super::FheUint64, u8, u16, u32, u64, u128),
@@ -787,13 +787,13 @@ generic_integer_impl_scalar_operation!(
         }
     },
     fhe_and_scalar_type:
-        (super::FheUint2, u8, u16, u32, u64, u128),
-        (super::FheUint4, u8, u16, u32, u64, u128),
-        (super::FheUint6, u8, u16, u32, u64, u128),
+        // (super::FheUint2, u8, u16, u32, u64, u128),
+        // (super::FheUint4, u8, u16, u32, u64, u128),
+        // (super::FheUint6, u8, u16, u32, u64, u128),
         (super::FheUint8, u8, u16, u32, u64, u128),
-        (super::FheUint10, u8, u16, u32, u64, u128),
-        (super::FheUint12, u8, u16, u32, u64, u128),
-        (super::FheUint14, u8, u16, u32, u64, u128),
+        // (super::FheUint10, u8, u16, u32, u64, u128),
+        // (super::FheUint12, u8, u16, u32, u64, u128),
+        // (super::FheUint14, u8, u16, u32, u64, u128),
         (super::FheUint16, u8, u16, u32, u64, u128),
         (super::FheUint32, u8, u16, u32, u64, u128),
         (super::FheUint64, u8, u16, u32, u64, u128),
@@ -825,13 +825,13 @@ generic_integer_impl_scalar_operation!(
         }
     },
     fhe_and_scalar_type:
-        (super::FheUint2, u8, u16, u32, u64, u128),
-        (super::FheUint4, u8, u16, u32, u64, u128),
-        (super::FheUint6, u8, u16, u32, u64, u128),
+        // (super::FheUint2, u8, u16, u32, u64, u128),
+        // (super::FheUint4, u8, u16, u32, u64, u128),
+        // (super::FheUint6, u8, u16, u32, u64, u128),
         (super::FheUint8, u8, u16, u32, u64, u128),
-        (super::FheUint10, u8, u16, u32, u64, u128),
-        (super::FheUint12, u8, u16, u32, u64, u128),
-        (super::FheUint14, u8, u16, u32, u64, u128),
+        // (super::FheUint10, u8, u16, u32, u64, u128),
+        // (super::FheUint12, u8, u16, u32, u64, u128),
+        // (super::FheUint14, u8, u16, u32, u64, u128),
         (super::FheUint16, u8, u16, u32, u64, u128),
         (super::FheUint32, u8, u16, u32, u64, u128),
         (super::FheUint64, u8, u16, u32, u64, u128),
@@ -858,13 +858,13 @@ generic_integer_impl_scalar_operation!(
         }
     },
     fhe_and_scalar_type:
-        (super::FheUint2, u8),
-        (super::FheUint4, u8),
-        (super::FheUint6, u8),
+        // (super::FheUint2, u8),
+        // (super::FheUint4, u8),
+        // (super::FheUint6, u8),
         (super::FheUint8, u8),
-        (super::FheUint10, u16),
-        (super::FheUint12, u16),
-        (super::FheUint14, u16),
+        // (super::FheUint10, u16),
+        // (super::FheUint12, u16),
+        // (super::FheUint14, u16),
         (super::FheUint16, u16),
         (super::FheUint32, u32),
         (super::FheUint64, u64),
@@ -891,13 +891,13 @@ generic_integer_impl_scalar_operation!(
         }
     },
     fhe_and_scalar_type:
-        (super::FheUint2, u8),
-        (super::FheUint4, u8),
-        (super::FheUint6, u8),
+        // (super::FheUint2, u8),
+        // (super::FheUint4, u8),
+        // (super::FheUint6, u8),
         (super::FheUint8, u8),
-        (super::FheUint10, u16),
-        (super::FheUint12, u16),
-        (super::FheUint14, u16),
+        // (super::FheUint10, u16),
+        // (super::FheUint12, u16),
+        // (super::FheUint14, u16),
         (super::FheUint16, u16),
         (super::FheUint32, u32),
         (super::FheUint64, u64),
@@ -982,13 +982,13 @@ generic_integer_impl_scalar_left_operation!(
         }
     },
     fhe_and_scalar_type:
-        (super::FheUint2, u8),
-        (super::FheUint4, u8),
-        (super::FheUint6, u8),
+        // (super::FheUint2, u8),
+        // (super::FheUint4, u8),
+        // (super::FheUint6, u8),
         (super::FheUint8, u8),
-        (super::FheUint10, u16),
-        (super::FheUint12, u16),
-        (super::FheUint14, u16),
+        // (super::FheUint10, u16),
+        // (super::FheUint12, u16),
+        // (super::FheUint14, u16),
         (super::FheUint16,
             /// Adds a [super::FheUint16] to a clear
             ///
@@ -1045,13 +1045,13 @@ generic_integer_impl_scalar_left_operation!(
         }
     },
     fhe_and_scalar_type:
-        (super::FheUint2, u8),
-        (super::FheUint4, u8),
-        (super::FheUint6, u8),
+        // (super::FheUint2, u8),
+        // (super::FheUint4, u8),
+        // (super::FheUint6, u8),
         (super::FheUint8, u8),
-        (super::FheUint10, u16),
-        (super::FheUint12, u16),
-        (super::FheUint14, u16),
+        // (super::FheUint10, u16),
+        // (super::FheUint12, u16),
+        // (super::FheUint14, u16),
         (super::FheUint16,
             /// Subtract a [super::FheUint16] to a clear
             ///
@@ -1081,6 +1081,49 @@ generic_integer_impl_scalar_left_operation!(
         (super::FheUint256, U256),
 );
 generic_integer_impl_scalar_left_operation!(
+    rust_trait: BitAnd(bitand),
+    implem: {
+        |lhs, rhs: &FheUint<_>| {
+            // `&` is commutative
+            let result: FheUint<_> = rhs & lhs;
+            result.ciphertext
+        }
+    },
+    fhe_and_scalar_type:
+       // (super::FheUint2, u8),
+//        (super::FheUint4, u8),
+//        (super::FheUint6, u8),
+        (super::FheUint8, u8),
+//        (super::FheUint10, u16),
+//        (super::FheUint12, u16),
+//        (super::FheUint14, u16),
+        (super::FheUint16,
+            /// Performs a bitwise 'and' between a clear and [super::FheUint16]
+            ///
+            /// # Example
+            ///
+            /// ```rust
+            /// use tfhe::prelude::*;
+            /// use tfhe::{generate_keys, set_server_key, ConfigBuilder, FheUint16};
+            ///
+            /// let (client_key, server_key) = generate_keys(ConfigBuilder::default());
+            /// set_server_key(server_key);
+            ///
+            /// let a = 23u16;
+            /// let b = FheUint16::encrypt(3u16, &client_key);
+            ///
+            /// let result = a & &b;
+            /// let result: u16 = result.decrypt(&client_key);
+            /// assert_eq!(result, 23u16 & 3u16);
+            /// ```
+            u16),
+        (super::FheUint32, u32),
+        (super::FheUint64, u64),
+        (super::FheUint128, u128),
+        (super::FheUint160, U256),
+        (super::FheUint256, U256),
+);
+generic_integer_impl_scalar_left_operation!(
     rust_trait: Mul(mul),
     implem: {
         |lhs, rhs: &FheUint<_>| {
@@ -1090,13 +1133,13 @@ generic_integer_impl_scalar_left_operation!(
         }
     },
     fhe_and_scalar_type:
-        (super::FheUint2, u8),
-        (super::FheUint4, u8),
-        (super::FheUint6, u8),
+       // (super::FheUint2, u8),
+//        (super::FheUint4, u8),
+//        (super::FheUint6, u8),
         (super::FheUint8, u8),
-        (super::FheUint10, u16),
-        (super::FheUint12, u16),
-        (super::FheUint14, u16),
+//        (super::FheUint10, u16),
+//        (super::FheUint12, u16),
+//        (super::FheUint14, u16),
         (super::FheUint16,
             /// Multiplies a [super::FheUint16] to a clear
             ///
@@ -1126,49 +1169,6 @@ generic_integer_impl_scalar_left_operation!(
         (super::FheUint256, U256),
 );
 generic_integer_impl_scalar_left_operation!(
-    rust_trait: BitAnd(bitand),
-    implem: {
-        |lhs, rhs: &FheUint<_>| {
-            // `&` is commutative
-            let result: FheUint<_> = rhs & lhs;
-            result.ciphertext
-        }
-    },
-    fhe_and_scalar_type:
-        (super::FheUint2, u8),
-        (super::FheUint4, u8),
-        (super::FheUint6, u8),
-        (super::FheUint8, u8),
-        (super::FheUint10, u16),
-        (super::FheUint12, u16),
-        (super::FheUint14, u16),
-        (super::FheUint16,
-            /// Performs a bitwise 'and' between a clear and [super::FheUint16]
-            ///
-            /// # Example
-            ///
-            /// ```rust
-            /// use tfhe::prelude::*;
-            /// use tfhe::{generate_keys, set_server_key, ConfigBuilder, FheUint16};
-            ///
-            /// let (client_key, server_key) = generate_keys(ConfigBuilder::default());
-            /// set_server_key(server_key);
-            ///
-            /// let a = 23u16;
-            /// let b = FheUint16::encrypt(3u16, &client_key);
-            ///
-            /// let result = a & &b;
-            /// let result: u16 = result.decrypt(&client_key);
-            /// assert_eq!(result, 23u16 & 3u16);
-            /// ```
-            u16),
-        (super::FheUint32, u32),
-        (super::FheUint64, u64),
-        (super::FheUint128, u128),
-        (super::FheUint160, U256),
-        (super::FheUint256, U256),
-);
-generic_integer_impl_scalar_left_operation!(
     rust_trait: BitOr(bitor),
     implem: {
         |lhs, rhs: &FheUint<_>| {
@@ -1178,13 +1178,13 @@ generic_integer_impl_scalar_left_operation!(
         }
     },
     fhe_and_scalar_type:
-        (super::FheUint2, u8),
-        (super::FheUint4, u8),
-        (super::FheUint6, u8),
+       // (super::FheUint2, u8),
+//        (super::FheUint4, u8),
+//        (super::FheUint6, u8),
         (super::FheUint8,u8),
-        (super::FheUint10, u16),
-        (super::FheUint12, u16),
-        (super::FheUint14, u16),
+//        (super::FheUint10, u16),
+//        (super::FheUint12, u16),
+//        (super::FheUint14, u16),
         (super::FheUint16,
             /// Performs a bitwise 'or' between a clear and [super::FheUint16]
             ///
@@ -1221,13 +1221,13 @@ generic_integer_impl_scalar_left_operation!(
         }
     },
     fhe_and_scalar_type:
-        (super::FheUint2, u8),
-        (super::FheUint4, u8),
-        (super::FheUint6, u8),
+       // (super::FheUint2, u8),
+//        (super::FheUint4, u8),
+//        (super::FheUint6, u8),
         (super::FheUint8, u8),
-        (super::FheUint10, u16),
-        (super::FheUint12, u16),
-        (super::FheUint14, u16),
+//        (super::FheUint10, u16),
+//        (super::FheUint12, u16),
+//        (super::FheUint14, u16),
         (super::FheUint16,
             /// Performs a bitwise 'xor' between a clear and [super::FheUint16]
             ///
@@ -1306,13 +1306,13 @@ generic_integer_impl_scalar_operation_assign!(
         }
     },
     fhe_and_scalar_type:
-        (super::FheUint2, u8),
-        (super::FheUint4, u8),
-        (super::FheUint6, u8),
+       // (super::FheUint2, u8),
+//        (super::FheUint4, u8),
+//        (super::FheUint6, u8),
         (super::FheUint8, u8),
-        (super::FheUint10, u16),
-        (super::FheUint12, u16),
-        (super::FheUint14, u16),
+//        (super::FheUint10, u16),
+//        (super::FheUint12, u16),
+//        (super::FheUint14, u16),
         (super::FheUint16,
         /// Adds a clear to a [super::FheUint16]
         ///
@@ -1363,13 +1363,13 @@ generic_integer_impl_scalar_operation_assign!(
         }
     },
     fhe_and_scalar_type:
-        (super::FheUint2, u8),
-        (super::FheUint4, u8),
-        (super::FheUint6, u8),
+       // (super::FheUint2, u8),
+//        (super::FheUint4, u8),
+//        (super::FheUint6, u8),
         (super::FheUint8, u8),
-        (super::FheUint10, u16),
-        (super::FheUint12, u16),
-        (super::FheUint14, u16),
+//        (super::FheUint10, u16),
+//        (super::FheUint12, u16),
+//        (super::FheUint14, u16),
         (super::FheUint16, u16),
         (super::FheUint32, u32),
         (super::FheUint64, u64),
@@ -1398,13 +1398,13 @@ generic_integer_impl_scalar_operation_assign!(
         }
     },
     fhe_and_scalar_type:
-        (super::FheUint2, u8),
-        (super::FheUint4, u8),
-        (super::FheUint6, u8),
+       // (super::FheUint2, u8),
+//        (super::FheUint4, u8),
+//        (super::FheUint6, u8),
         (super::FheUint8, u8),
-        (super::FheUint10, u16),
-        (super::FheUint12, u16),
-        (super::FheUint14, u16),
+//        (super::FheUint10, u16),
+//        (super::FheUint12, u16),
+//        (super::FheUint14, u16),
         (super::FheUint16, u16),
         (super::FheUint32, u32),
         (super::FheUint64, u64),
@@ -1433,13 +1433,13 @@ generic_integer_impl_scalar_operation_assign!(
         }
     },
     fhe_and_scalar_type:
-        (super::FheUint2, u8),
-        (super::FheUint4, u8),
-        (super::FheUint6, u8),
+       // (super::FheUint2, u8),
+//        (super::FheUint4, u8),
+//        (super::FheUint6, u8),
         (super::FheUint8, u8),
-        (super::FheUint10, u16),
-        (super::FheUint12, u16),
-        (super::FheUint14, u16),
+//        (super::FheUint10, u16),
+//        (super::FheUint12, u16),
+//        (super::FheUint14, u16),
         (super::FheUint16, u16),
         (super::FheUint32, u32),
         (super::FheUint64, u64),
@@ -1468,13 +1468,13 @@ generic_integer_impl_scalar_operation_assign!(
         }
     },
     fhe_and_scalar_type:
-        (super::FheUint2, u8),
-        (super::FheUint4, u8),
-        (super::FheUint6, u8),
+       // (super::FheUint2, u8),
+//        (super::FheUint4, u8),
+//        (super::FheUint6, u8),
         (super::FheUint8, u8),
-        (super::FheUint10, u16),
-        (super::FheUint12, u16),
-        (super::FheUint14, u16),
+//        (super::FheUint10, u16),
+//        (super::FheUint12, u16),
+//        (super::FheUint14, u16),
         (super::FheUint16, u16),
         (super::FheUint32, u32),
         (super::FheUint64, u64),
@@ -1503,13 +1503,13 @@ generic_integer_impl_scalar_operation_assign!(
         }
     },
     fhe_and_scalar_type:
-        (super::FheUint2, u8),
-        (super::FheUint4, u8),
-        (super::FheUint6, u8),
+       // (super::FheUint2, u8),
+//        (super::FheUint4, u8),
+//        (super::FheUint6, u8),
         (super::FheUint8, u8),
-        (super::FheUint10, u16),
-        (super::FheUint12, u16),
-        (super::FheUint14, u16),
+//        (super::FheUint10, u16),
+//        (super::FheUint12, u16),
+//        (super::FheUint14, u16),
         (super::FheUint16, u16),
         (super::FheUint32, u32),
         (super::FheUint64, u64),
@@ -1538,13 +1538,13 @@ generic_integer_impl_scalar_operation_assign!(
         }
     },
     fhe_and_scalar_type:
-        (super::FheUint2, u8, u16, u32, u64, u128),
-        (super::FheUint4, u8, u16, u32, u64, u128),
-        (super::FheUint6, u8, u16, u32, u64, u128),
+        // (super::FheUint2, u8, u16, u32, u64, u128),
+        // (super::FheUint4, u8, u16, u32, u64, u128),
+        // (super::FheUint6, u8, u16, u32, u64, u128),
         (super::FheUint8, u8, u16, u32, u64, u128),
-        (super::FheUint10, u8, u16, u32, u64, u128),
-        (super::FheUint12, u8, u16, u32, u64, u128),
-        (super::FheUint14, u8, u16, u32, u64, u128),
+        // (super::FheUint10, u8, u16, u32, u64, u128),
+        // (super::FheUint12, u8, u16, u32, u64, u128),
+        // (super::FheUint14, u8, u16, u32, u64, u128),
         (super::FheUint16, u8, u16, u32, u64, u128),
         (super::FheUint32, u8, u16, u32, u64, u128),
         (super::FheUint64, u8, u16, u32, u64, u128),
@@ -1573,13 +1573,13 @@ generic_integer_impl_scalar_operation_assign!(
         }
     },
     fhe_and_scalar_type:
-        (super::FheUint2, u8, u16, u32, u64, u128),
-        (super::FheUint4, u8, u16, u32, u64, u128),
-        (super::FheUint6, u8, u16, u32, u64, u128),
+        // (super::FheUint2, u8, u16, u32, u64, u128),
+        // (super::FheUint4, u8, u16, u32, u64, u128),
+        // (super::FheUint6, u8, u16, u32, u64, u128),
         (super::FheUint8, u8, u16, u32, u64, u128),
-        (super::FheUint10, u8, u16, u32, u64, u128),
-        (super::FheUint12, u8, u16, u32, u64, u128),
-        (super::FheUint14, u8, u16, u32, u64, u128),
+        // (super::FheUint10, u8, u16, u32, u64, u128),
+        // (super::FheUint12, u8, u16, u32, u64, u128),
+        // (super::FheUint14, u8, u16, u32, u64, u128),
         (super::FheUint16, u8, u16, u32, u64, u128),
         (super::FheUint32, u8, u16, u32, u64, u128),
         (super::FheUint64, u8, u16, u32, u64, u128),
@@ -1608,13 +1608,13 @@ generic_integer_impl_scalar_operation_assign!(
         }
     },
     fhe_and_scalar_type:
-        (super::FheUint2, u8, u16, u32, u64, u128),
-        (super::FheUint4, u8, u16, u32, u64, u128),
-        (super::FheUint6, u8, u16, u32, u64, u128),
+        // (super::FheUint2, u8, u16, u32, u64, u128),
+        // (super::FheUint4, u8, u16, u32, u64, u128),
+        // (super::FheUint6, u8, u16, u32, u64, u128),
         (super::FheUint8, u8, u16, u32, u64, u128),
-        (super::FheUint10, u8, u16, u32, u64, u128),
-        (super::FheUint12, u8, u16, u32, u64, u128),
-        (super::FheUint14, u8, u16, u32, u64, u128),
+        // (super::FheUint10, u8, u16, u32, u64, u128),
+        // (super::FheUint12, u8, u16, u32, u64, u128),
+        // (super::FheUint14, u8, u16, u32, u64, u128),
         (super::FheUint16, u8, u16, u32, u64, u128),
         (super::FheUint32, u8, u16, u32, u64, u128),
         (super::FheUint64, u8, u16, u32, u64, u128),
@@ -1643,13 +1643,13 @@ generic_integer_impl_scalar_operation_assign!(
         }
     },
     fhe_and_scalar_type:
-        (super::FheUint2, u8, u16, u32, u64, u128),
-        (super::FheUint4, u8, u16, u32, u64, u128),
-        (super::FheUint6, u8, u16, u32, u64, u128),
+        // (super::FheUint2, u8, u16, u32, u64, u128),
+        // (super::FheUint4, u8, u16, u32, u64, u128),
+        // (super::FheUint6, u8, u16, u32, u64, u128),
         (super::FheUint8, u8, u16, u32, u64, u128),
-        (super::FheUint10, u8, u16, u32, u64, u128),
-        (super::FheUint12, u8, u16, u32, u64, u128),
-        (super::FheUint14, u8, u16, u32, u64, u128),
+        // (super::FheUint10, u8, u16, u32, u64, u128),
+        // (super::FheUint12, u8, u16, u32, u64, u128),
+        // (super::FheUint14, u8, u16, u32, u64, u128),
         (super::FheUint16, u8, u16, u32, u64, u128),
         (super::FheUint32, u8, u16, u32, u64, u128),
         (super::FheUint64, u8, u16, u32, u64, u128),
@@ -1675,13 +1675,13 @@ generic_integer_impl_scalar_operation_assign!(
         }
     },
     fhe_and_scalar_type:
-        (super::FheUint2, u8),
-        (super::FheUint4, u8),
-        (super::FheUint6, u8),
+       // (super::FheUint2, u8),
+//        (super::FheUint4, u8),
+//        (super::FheUint6, u8),
         (super::FheUint8, u8),
-        (super::FheUint10, u16),
-        (super::FheUint12, u16),
-        (super::FheUint14, u16),
+//        (super::FheUint10, u16),
+//        (super::FheUint12, u16),
+//        (super::FheUint14, u16),
         (super::FheUint16, u16),
         (super::FheUint32, u32),
         (super::FheUint64, u64),
@@ -1707,13 +1707,13 @@ generic_integer_impl_scalar_operation_assign!(
         }
     },
     fhe_and_scalar_type:
-        (super::FheUint2, u8),
-        (super::FheUint4, u8),
-        (super::FheUint6, u8),
+       // (super::FheUint2, u8),
+//        (super::FheUint4, u8),
+//        (super::FheUint6, u8),
         (super::FheUint8, u8),
-        (super::FheUint10, u16),
-        (super::FheUint12, u16),
-        (super::FheUint14, u16),
+//        (super::FheUint10, u16),
+//        (super::FheUint12, u16),
+//        (super::FheUint14, u16),
         (super::FheUint16, u16),
         (super::FheUint32, u32),
         (super::FheUint64, u64),

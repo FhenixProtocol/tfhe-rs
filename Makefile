@@ -391,7 +391,7 @@ build_web_js_api: install_rs_build_toolchain install_wasm_pack
 	cd tfhe && \
 	RUSTFLAGS="$(WASM_RUSTFLAGS)" rustup run "$(RS_BUILD_TOOLCHAIN)" \
 		wasm-pack build --release --target=web \
-		-- --features=boolean-client-js-wasm-api,shortint-client-js-wasm-api,integer-client-js-wasm-api,zk-pok-experimental
+		-- --features=boolean-client-js-wasm-api,shortint-client-js-wasm-api,integer-client-js-wasm-api
 
 .PHONY: build_web_js_api_parallel # Build the js API targeting the web browser with parallelism support
 build_web_js_api_parallel: install_rs_check_toolchain install_wasm_pack
@@ -399,7 +399,7 @@ build_web_js_api_parallel: install_rs_check_toolchain install_wasm_pack
 	rustup component add rust-src --toolchain $(RS_CHECK_TOOLCHAIN) && \
 	RUSTFLAGS="$(WASM_RUSTFLAGS) -C target-feature=+atomics,+bulk-memory,+mutable-globals" rustup run $(RS_CHECK_TOOLCHAIN) \
 		wasm-pack build --release --target=web \
-		-- --features=boolean-client-js-wasm-api,shortint-client-js-wasm-api,integer-client-js-wasm-api,parallel-wasm-api,zk-pok-experimental \
+		-- --features=boolean-client-js-wasm-api,shortint-client-js-wasm-api,integer-client-js-wasm-api,parallel-wasm-api \
 		-Z build-std=panic_abort,std
 
 .PHONY: build_node_js_api # Build the js API targeting nodejs
@@ -407,7 +407,7 @@ build_node_js_api: install_rs_build_toolchain install_wasm_pack
 	cd tfhe && \
 	RUSTFLAGS="$(WASM_RUSTFLAGS)" rustup run "$(RS_BUILD_TOOLCHAIN)" \
 		wasm-pack build --release --target=nodejs \
-		-- --features=boolean-client-js-wasm-api,shortint-client-js-wasm-api,integer-client-js-wasm-api,zk-pok-experimental
+		-- --features=boolean-client-js-wasm-api,shortint-client-js-wasm-api,integer-client-js-wasm-api
 
 .PHONY: build_concrete_csprng # Build concrete_csprng
 build_concrete_csprng: install_rs_build_toolchain

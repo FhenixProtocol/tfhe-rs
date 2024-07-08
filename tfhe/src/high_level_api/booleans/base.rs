@@ -3,7 +3,7 @@ use crate::conformance::ParameterSetConformant;
 use crate::high_level_api::global_state;
 #[cfg(feature = "gpu")]
 use crate::high_level_api::global_state::with_thread_local_cuda_stream;
-use crate::high_level_api::integers::{FheInt, FheIntId, FheUint, FheUintId};
+use crate::high_level_api::integers::{FheUint, FheUintId};
 use crate::high_level_api::keys::InternalServerKey;
 use crate::high_level_api::traits::{FheEq, IfThenElse};
 #[cfg(feature = "gpu")]
@@ -201,30 +201,30 @@ where
     }
 }
 
-impl<Id: FheIntId> IfThenElse<FheInt<Id>> for FheBool {
-    /// Conditional selection.
-    ///
-    /// The output value returned depends on the value of `self`.
-    ///
-    /// - if `self` is true, the output will have the value of `ct_then`
-    /// - if `self` is false, the output will have the value of `ct_else`
-    fn if_then_else(&self, ct_then: &FheInt<Id>, ct_else: &FheInt<Id>) -> FheInt<Id> {
-        let ct_condition = self;
-        let new_ct = global_state::with_internal_keys(|key| match key {
-            InternalServerKey::Cpu(key) => key.pbs_key().if_then_else_parallelized(
-                &ct_condition.ciphertext.on_cpu(),
-                &*ct_then.ciphertext.on_cpu(),
-                &*ct_else.ciphertext.on_cpu(),
-            ),
-            #[cfg(feature = "gpu")]
-            InternalServerKey::Cuda(_) => {
-                panic!("Cuda devices do not support signed integers")
-            }
-        });
-
-        FheInt::new(new_ct)
-    }
-}
+// impl<Id: FheIntId> IfThenElse<FheInt<Id>> for FheBool {
+//     /// Conditional selection.
+//     ///
+//     /// The output value returned depends on the value of `self`.
+//     ///
+//     /// - if `self` is true, the output will have the value of `ct_then`
+//     /// - if `self` is false, the output will have the value of `ct_else`
+//     fn if_then_else(&self, ct_then: &FheInt<Id>, ct_else: &FheInt<Id>) -> FheInt<Id> {
+//         let ct_condition = self;
+//         let new_ct = global_state::with_internal_keys(|key| match key {
+//             InternalServerKey::Cpu(key) => key.pbs_key().if_then_else_parallelized(
+//                 &ct_condition.ciphertext.on_cpu(),
+//                 &*ct_then.ciphertext.on_cpu(),
+//                 &*ct_else.ciphertext.on_cpu(),
+//             ),
+//             #[cfg(feature = "gpu")]
+//             InternalServerKey::Cuda(_) => {
+//                 panic!("Cuda devices do not support signed integers")
+//             }
+//         });
+//
+//         FheInt::new(new_ct)
+//     }
+// }
 
 impl<B> FheEq<B> for FheBool
 where

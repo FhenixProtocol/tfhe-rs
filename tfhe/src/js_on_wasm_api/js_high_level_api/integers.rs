@@ -1,4 +1,5 @@
-use crate::high_level_api::prelude::*;
+// use crate::high_level_api::prelude::*;
+use crate::high_level_api::prelude::FheTryEncrypt;
 use crate::integer::{I256, U256};
 use crate::js_on_wasm_api::js_high_level_api::{catch_panic, catch_panic_result, into_js_error};
 use wasm_bindgen::prelude::*;
@@ -102,47 +103,47 @@ macro_rules! create_wrapper_type_non_native_type (
 
         #[wasm_bindgen]
         impl $type_name {
-            #[wasm_bindgen]
-            pub fn encrypt_with_client_key(
-                value: JsValue,
-                client_key: &crate::js_on_wasm_api::js_high_level_api::keys::TfheClientKey,
-            ) -> Result<$type_name, JsError> {
-                catch_panic_result(|| {
-                    let value = <$rust_type>::try_from(value)
-                        .map_err(|_| JsError::new(&format!("Failed to convert the value to a {}", stringify!($rust_type))))?;
-                    crate::high_level_api::$type_name::try_encrypt(value, &client_key.0)
-                        .map($type_name)
-                        .map_err(into_js_error)
-                })
-            }
-
-            #[wasm_bindgen]
-            pub fn encrypt_with_public_key(
-                value: JsValue,
-                public_key: &crate::js_on_wasm_api::js_high_level_api::keys::TfhePublicKey,
-            ) -> Result<$type_name, JsError> {
-                catch_panic_result(|| {
-                    let value = <$rust_type>::try_from(value)
-                        .map_err(|_| JsError::new(&format!("Failed to convert the value to a {}", stringify!($rust_type))))?;
-                    crate::high_level_api::$type_name::try_encrypt(value, &public_key.0)
-                        .map($type_name)
-                        .map_err(into_js_error)
-                })
-            }
-
-            #[wasm_bindgen]
-            pub fn encrypt_with_compressed_public_key(
-                value: JsValue,
-                compressed_public_key: &crate::js_on_wasm_api::js_high_level_api::keys::TfheCompressedPublicKey,
-            ) -> Result<$type_name, JsError> {
-                catch_panic_result(|| {
-                    let value = <$rust_type>::try_from(value)
-                        .map_err(|_| JsError::new(&format!("Failed to convert the value to a {}", stringify!($rust_type))))?;
-                    crate::high_level_api::$type_name::try_encrypt(value, &compressed_public_key.0)
-                        .map($type_name)
-                        .map_err(into_js_error)
-                })
-            }
+            // #[wasm_bindgen]
+            // pub fn encrypt_with_client_key(
+            //     value: JsValue,
+            //     client_key: &crate::js_on_wasm_api::js_high_level_api::keys::TfheClientKey,
+            // ) -> Result<$type_name, JsError> {
+            //     catch_panic_result(|| {
+            //         let value = <$rust_type>::try_from(value)
+            //             .map_err(|_| JsError::new(&format!("Failed to convert the value to a {}", stringify!($rust_type))))?;
+            //         crate::high_level_api::$type_name::try_encrypt(value, &client_key.0)
+            //             .map($type_name)
+            //             .map_err(into_js_error)
+            //     })
+            // }
+            //
+            // #[wasm_bindgen]
+            // pub fn encrypt_with_public_key(
+            //     value: JsValue,
+            //     public_key: &crate::js_on_wasm_api::js_high_level_api::keys::TfhePublicKey,
+            // ) -> Result<$type_name, JsError> {
+            //     catch_panic_result(|| {
+            //         let value = <$rust_type>::try_from(value)
+            //             .map_err(|_| JsError::new(&format!("Failed to convert the value to a {}", stringify!($rust_type))))?;
+            //         crate::high_level_api::$type_name::try_encrypt(value, &public_key.0)
+            //             .map($type_name)
+            //             .map_err(into_js_error)
+            //     })
+            // }
+            //
+            // #[wasm_bindgen]
+            // pub fn encrypt_with_compressed_public_key(
+            //     value: JsValue,
+            //     compressed_public_key: &crate::js_on_wasm_api::js_high_level_api::keys::TfheCompressedPublicKey,
+            // ) -> Result<$type_name, JsError> {
+            //     catch_panic_result(|| {
+            //         let value = <$rust_type>::try_from(value)
+            //             .map_err(|_| JsError::new(&format!("Failed to convert the value to a {}", stringify!($rust_type))))?;
+            //         crate::high_level_api::$type_name::try_encrypt(value, &compressed_public_key.0)
+            //             .map($type_name)
+            //             .map_err(into_js_error)
+            //     })
+            // }
 
             #[wasm_bindgen]
             pub fn encrypt_with_compact_public_key(
@@ -158,112 +159,114 @@ macro_rules! create_wrapper_type_non_native_type (
                 })
             }
 
-            #[wasm_bindgen]
-            pub fn decrypt(
-                &self,
-                client_key: &crate::js_on_wasm_api::js_high_level_api::keys::TfheClientKey,
-            ) -> Result<JsValue, JsError> {
-                catch_panic_result(|| {
-                    let value: $rust_type = self.0.decrypt(&client_key.0);
+            // #[wasm_bindgen]
+            // pub fn decrypt(
+            //     &self,
+            //     client_key: &crate::js_on_wasm_api::js_high_level_api::keys::TfheClientKey,
+            // ) -> Result<JsValue, JsError> {
+            //     catch_panic_result(|| {
+            //         let value: $rust_type = self.0.decrypt(&client_key.0);
+            //
+            //         JsValue::try_from(value)
+            //             .map_err(into_js_error)
+            //     })
+            // }
 
-                    JsValue::try_from(value)
-                        .map_err(into_js_error)
-                })
-            }
+            // #[wasm_bindgen]
+            // pub fn serialize(&self) -> Result<Vec<u8>, JsError> {
+            //     catch_panic_result(|| bincode::serialize(&self.0).map_err(into_js_error))
+            // }
 
-            #[wasm_bindgen]
-            pub fn serialize(&self) -> Result<Vec<u8>, JsError> {
-                catch_panic_result(|| bincode::serialize(&self.0).map_err(into_js_error))
-            }
+            // #[wasm_bindgen]
+            // pub fn deserialize(buffer: &[u8]) -> Result<$type_name, JsError> {
+            //     catch_panic_result(|| {
+            //         bincode::deserialize(buffer)
+            //             .map($type_name)
+            //             .map_err(into_js_error)
+            //     })
+            // }
 
-            #[wasm_bindgen]
-            pub fn deserialize(buffer: &[u8]) -> Result<$type_name, JsError> {
-                catch_panic_result(|| {
-                    bincode::deserialize(buffer)
-                        .map($type_name)
-                        .map_err(into_js_error)
-                })
-            }
+            // #[wasm_bindgen]
+            // pub fn safe_serialize(&self, serialized_size_limit: u64) -> Result<Vec<u8>, JsError> {
+            //     let mut buffer = vec![];
+            //     catch_panic_result(|| crate::safe_deserialization::safe_serialize(&self.0, &mut buffer, serialized_size_limit)
+            //         .map_err(into_js_error))?;
+            //
+            //     Ok(buffer)
+            // }
 
-            #[wasm_bindgen]
-            pub fn safe_serialize(&self, serialized_size_limit: u64) -> Result<Vec<u8>, JsError> {
-                let mut buffer = vec![];
-                catch_panic_result(|| crate::safe_deserialization::safe_serialize(&self.0, &mut buffer, serialized_size_limit)
-                    .map_err(into_js_error))?;
-
-                Ok(buffer)
-            }
-
-            #[wasm_bindgen]
-            pub fn safe_deserialize(buffer: &[u8], serialized_size_limit: u64) -> Result<$type_name, JsError> {
-                catch_panic_result(|| {
-                    crate::safe_deserialization::safe_deserialize(buffer, serialized_size_limit)
-                        .map($type_name)
-                        .map_err(into_js_error)
-                })
-            }
+            // #[wasm_bindgen]
+            // pub fn safe_deserialize(buffer: &[u8], serialized_size_limit: u64) -> Result<$type_name, JsError> {
+            //     catch_panic_result(|| {
+            //         crate::safe_deserialization::safe_deserialize(buffer, serialized_size_limit)
+            //             .map($type_name)
+            //             .map_err(into_js_error)
+            //     })
+            // }
         }
 
-        #[wasm_bindgen]
-        pub struct $compressed_type_name(pub(crate) crate::high_level_api::$compressed_type_name);
-
-        #[wasm_bindgen]
-        impl $compressed_type_name {
-            #[wasm_bindgen]
-            pub fn encrypt_with_client_key(
-                value: JsValue,
-                client_key: &crate::js_on_wasm_api::js_high_level_api::keys::TfheClientKey,
-            ) -> Result<$compressed_type_name, JsError> {
-                catch_panic_result(|| {
-                    let value = <$rust_type>::try_from(value)
-                        .map_err(|_| JsError::new(&format!("Failed to convert the value to a {}", stringify!($rust_type))))?;
-                    crate::high_level_api::$compressed_type_name::try_encrypt(value, &client_key.0)
-                        .map($compressed_type_name)
-                        .map_err(into_js_error)
-                })
-            }
-
-            #[wasm_bindgen]
-            pub fn decompress(
-                &self,
-            ) -> Result<$type_name, JsError> {
-                catch_panic(||{
-                    $type_name(self.0.decompress())
-                })
-            }
-
-            #[wasm_bindgen]
-            pub fn serialize(&self) -> Result<Vec<u8>, JsError> {
-                catch_panic_result(|| bincode::serialize(&self.0).map_err(into_js_error))
-            }
-
-            #[wasm_bindgen]
-            pub fn deserialize(buffer: &[u8]) -> Result<$compressed_type_name, JsError> {
-                catch_panic_result(|| {
-                    bincode::deserialize(buffer)
-                        .map($compressed_type_name)
-                        .map_err(into_js_error)
-                })
-            }
-
-            #[wasm_bindgen]
-            pub fn safe_serialize(&self, serialized_size_limit: u64) -> Result<Vec<u8>, JsError> {
-                let mut buffer = vec![];
-                catch_panic_result(|| crate::safe_deserialization::safe_serialize(&self.0, &mut buffer, serialized_size_limit)
-                    .map_err(into_js_error))?;
-
-                Ok(buffer)
-            }
-
-            #[wasm_bindgen]
-            pub fn safe_deserialize(buffer: &[u8], serialized_size_limit: u64) -> Result<$compressed_type_name, JsError> {
-                catch_panic_result(|| {
-                    crate::safe_deserialization::safe_deserialize(buffer, serialized_size_limit)
-                        .map($compressed_type_name)
-                        .map_err(into_js_error)
-                })
-            }
-        }
+        // #[cfg(feature = "compressed")]
+        // #[wasm_bindgen]
+        // pub struct $compressed_type_name(pub(crate) crate::high_level_api::$compressed_type_name);
+        //
+        // #[cfg(feature = "compressed")]
+        // #[wasm_bindgen]
+        // impl $compressed_type_name {
+        //     #[wasm_bindgen]
+        //     pub fn encrypt_with_client_key(
+        //         value: JsValue,
+        //         client_key: &crate::js_on_wasm_api::js_high_level_api::keys::TfheClientKey,
+        //     ) -> Result<$compressed_type_name, JsError> {
+        //         catch_panic_result(|| {
+        //             let value = <$rust_type>::try_from(value)
+        //                 .map_err(|_| JsError::new(&format!("Failed to convert the value to a {}", stringify!($rust_type))))?;
+        //             crate::high_level_api::$compressed_type_name::try_encrypt(value, &client_key.0)
+        //                 .map($compressed_type_name)
+        //                 .map_err(into_js_error)
+        //         })
+        //     }
+        //
+        //     #[wasm_bindgen]
+        //     pub fn decompress(
+        //         &self,
+        //     ) -> Result<$type_name, JsError> {
+        //         catch_panic(||{
+        //             $type_name(self.0.decompress())
+        //         })
+        //     }
+        //
+        //     #[wasm_bindgen]
+        //     pub fn serialize(&self) -> Result<Vec<u8>, JsError> {
+        //         catch_panic_result(|| bincode::serialize(&self.0).map_err(into_js_error))
+        //     }
+        //
+        //     #[wasm_bindgen]
+        //     pub fn deserialize(buffer: &[u8]) -> Result<$compressed_type_name, JsError> {
+        //         catch_panic_result(|| {
+        //             bincode::deserialize(buffer)
+        //                 .map($compressed_type_name)
+        //                 .map_err(into_js_error)
+        //         })
+        //     }
+        //
+        //     #[wasm_bindgen]
+        //     pub fn safe_serialize(&self, serialized_size_limit: u64) -> Result<Vec<u8>, JsError> {
+        //         let mut buffer = vec![];
+        //         catch_panic_result(|| crate::safe_deserialization::safe_serialize(&self.0, &mut buffer, serialized_size_limit)
+        //             .map_err(into_js_error))?;
+        //
+        //         Ok(buffer)
+        //     }
+        //
+        //     #[wasm_bindgen]
+        //     pub fn safe_deserialize(buffer: &[u8], serialized_size_limit: u64) -> Result<$compressed_type_name, JsError> {
+        //         catch_panic_result(|| {
+        //             crate::safe_deserialization::safe_deserialize(buffer, serialized_size_limit)
+        //                 .map($compressed_type_name)
+        //                 .map_err(into_js_error)
+        //         })
+        //     }
+        // }
 
         #[wasm_bindgen]
         pub struct $compact_type_name(pub(crate) crate::high_level_api::$compact_type_name);
@@ -326,59 +329,61 @@ macro_rules! create_wrapper_type_non_native_type (
             }
         }
 
-        #[wasm_bindgen]
-        pub struct $compact_list_type_name(pub(crate) crate::high_level_api::$compact_list_type_name);
-
-        #[wasm_bindgen]
-        impl $compact_list_type_name {
-            #[wasm_bindgen]
-            pub fn encrypt_with_compact_public_key(
-                values: Vec<JsValue>,
-                public_key: &crate::js_on_wasm_api::js_high_level_api::keys::TfheCompactPublicKey,
-            ) -> Result<$compact_list_type_name, JsError> {
-                catch_panic_result(|| {
-                    let values = values
-                        .into_iter()
-                        .map(|value| {
-                            <$rust_type>::try_from(value)
-                                .map_err(|_| {
-                                    JsError::new(&format!("Failed to convert the value to a {}", stringify!($rust_type)))
-                                })
-                        })
-                        .collect::<Result<Vec<_>, _>>()?;
-                    crate::high_level_api::$compact_list_type_name::try_encrypt(&values, &public_key.0)
-                        .map($compact_list_type_name)
-                        .map_err(into_js_error)
-                })
-            }
-
-            #[wasm_bindgen]
-            pub fn expand(
-                &self,
-            ) -> Result<Vec<JsValue>, JsError> {
-                catch_panic(||{
-                    self.0.expand()
-                        .into_iter()
-                        .map($type_name)
-                        .map(JsValue::from)
-                        .collect::<Vec<_>>()
-                })
-            }
-
-            #[wasm_bindgen]
-            pub fn serialize(&self) -> Result<Vec<u8>, JsError> {
-                catch_panic_result(|| bincode::serialize(&self.0).map_err(into_js_error))
-            }
-
-            #[wasm_bindgen]
-            pub fn deserialize(buffer: &[u8]) -> Result<$compact_list_type_name, JsError> {
-                catch_panic_result(|| {
-                    bincode::deserialize(buffer)
-                        .map($compact_list_type_name)
-                        .map_err(into_js_error)
-                })
-            }
-        }
+        // #[cfg(feature = "lists")]
+        // #[wasm_bindgen]
+        // pub struct $compact_list_type_name(pub(crate) crate::high_level_api::$compact_list_type_name);
+        //
+        // #[cfg(feature = "lists")]
+        // #[wasm_bindgen]
+        // impl $compact_list_type_name {
+        //     #[wasm_bindgen]
+        //     pub fn encrypt_with_compact_public_key(
+        //         values: Vec<JsValue>,
+        //         public_key: &crate::js_on_wasm_api::js_high_level_api::keys::TfheCompactPublicKey,
+        //     ) -> Result<$compact_list_type_name, JsError> {
+        //         catch_panic_result(|| {
+        //             let values = values
+        //                 .into_iter()
+        //                 .map(|value| {
+        //                     <$rust_type>::try_from(value)
+        //                         .map_err(|_| {
+        //                             JsError::new(&format!("Failed to convert the value to a {}", stringify!($rust_type)))
+        //                         })
+        //                 })
+        //                 .collect::<Result<Vec<_>, _>>()?;
+        //             crate::high_level_api::$compact_list_type_name::try_encrypt(&values, &public_key.0)
+        //                 .map($compact_list_type_name)
+        //                 .map_err(into_js_error)
+        //         })
+        //     }
+        //
+        //     #[wasm_bindgen]
+        //     pub fn expand(
+        //         &self,
+        //     ) -> Result<Vec<JsValue>, JsError> {
+        //         catch_panic(||{
+        //             self.0.expand()
+        //                 .into_iter()
+        //                 .map($type_name)
+        //                 .map(JsValue::from)
+        //                 .collect::<Vec<_>>()
+        //         })
+        //     }
+        //
+        //     #[wasm_bindgen]
+        //     pub fn serialize(&self) -> Result<Vec<u8>, JsError> {
+        //         catch_panic_result(|| bincode::serialize(&self.0).map_err(into_js_error))
+        //     }
+        //
+        //     #[wasm_bindgen]
+        //     pub fn deserialize(buffer: &[u8]) -> Result<$compact_list_type_name, JsError> {
+        //         catch_panic_result(|| {
+        //             bincode::deserialize(buffer)
+        //                 .map($compact_list_type_name)
+        //                 .map_err(into_js_error)
+        //         })
+        //     }
+        // }
 
         #[cfg(feature = "zk-pok-experimental")]
         #[wasm_bindgen]
@@ -585,36 +590,36 @@ create_wrapper_type_non_native_type!(
         rust_type: U256,
     },
     // Signed
-    {
-        type_name: FheInt128,
-        compressed_type_name: CompressedFheInt128,
-        compact_type_name: CompactFheInt128,
-        compact_list_type_name: CompactFheInt128List,
-        proven_type: ProvenFheInt128,
-        proven_compact_type_name: ProvenCompactFheInt128,
-        proven_compact_list_type_name: ProvenCompactFheInt128List,
-        rust_type: i128,
-    },
-    {
-        type_name: FheInt160,
-        compressed_type_name: CompressedFheInt160,
-        compact_type_name: CompactFheInt160,
-        compact_list_type_name: CompactFheInt160List,
-        proven_type: ProvenFheInt160,
-        proven_compact_type_name: ProvenCompactFheInt160,
-        proven_compact_list_type_name: ProvenCompactFheInt160List,
-        rust_type: I256,
-    },
-    {
-        type_name: FheInt256,
-        compressed_type_name: CompressedFheInt256,
-        compact_type_name: CompactFheInt256,
-        compact_list_type_name: CompactFheInt256List,
-        proven_type: ProvenFheInt256,
-        proven_compact_type_name: ProvenCompactFheInt256,
-        proven_compact_list_type_name: ProvenCompactFheInt256List,
-        rust_type: I256,
-    },
+    // {
+    //     type_name: FheInt128,
+    //     compressed_type_name: CompressedFheInt128,
+    //     compact_type_name: CompactFheInt128,
+    //     compact_list_type_name: CompactFheInt128List,
+    //     proven_type: ProvenFheInt128,
+    //     proven_compact_type_name: ProvenCompactFheInt128,
+    //     proven_compact_list_type_name: ProvenCompactFheInt128List,
+    //     rust_type: i128,
+    // },
+    // {
+    //     type_name: FheInt160,
+    //     compressed_type_name: CompressedFheInt160,
+    //     compact_type_name: CompactFheInt160,
+    //     compact_list_type_name: CompactFheInt160List,
+    //     proven_type: ProvenFheInt160,
+    //     proven_compact_type_name: ProvenCompactFheInt160,
+    //     proven_compact_list_type_name: ProvenCompactFheInt160List,
+    //     rust_type: I256,
+    // },
+    // {
+    //     type_name: FheInt256,
+    //     compressed_type_name: CompressedFheInt256,
+    //     compact_type_name: CompactFheInt256,
+    //     compact_list_type_name: CompactFheInt256List,
+    //     proven_type: ProvenFheInt256,
+    //     proven_compact_type_name: ProvenCompactFheInt256,
+    //     proven_compact_list_type_name: ProvenCompactFheInt256List,
+    //     rust_type: I256,
+    // },
 );
 
 // We use this macro to define wasm wrapper for
@@ -638,41 +643,41 @@ macro_rules! create_wrapper_type_that_has_native_type (
 
         #[wasm_bindgen]
         impl $type_name {
-            #[wasm_bindgen]
-            pub fn encrypt_with_client_key(
-                value: $native_type,
-                client_key: &crate::js_on_wasm_api::js_high_level_api::keys::TfheClientKey,
-            ) -> Result<$type_name, JsError> {
-                catch_panic_result(|| {
-                    crate::high_level_api::$type_name::try_encrypt(value, &client_key.0)
-                        .map($type_name)
-                        .map_err(into_js_error)
-                })
-            }
+            // #[wasm_bindgen]
+            // pub fn encrypt_with_client_key(
+            //     value: $native_type,
+            //     client_key: &crate::js_on_wasm_api::js_high_level_api::keys::TfheClientKey,
+            // ) -> Result<$type_name, JsError> {
+            //     catch_panic_result(|| {
+            //         crate::high_level_api::$type_name::try_encrypt(value, &client_key.0)
+            //             .map($type_name)
+            //             .map_err(into_js_error)
+            //     })
+            // }
 
-            #[wasm_bindgen]
-            pub fn encrypt_with_public_key(
-                value: $native_type,
-                public_key: &crate::js_on_wasm_api::js_high_level_api::keys::TfhePublicKey,
-            ) -> Result<$type_name, JsError> {
-                catch_panic_result(|| {
-                    crate::high_level_api::$type_name::try_encrypt(value, &public_key.0)
-                        .map($type_name)
-                        .map_err(into_js_error)
-                })
-            }
-
-            #[wasm_bindgen]
-            pub fn encrypt_with_compressed_public_key(
-                value: $native_type,
-                compressed_public_key: &crate::js_on_wasm_api::js_high_level_api::keys::TfheCompressedPublicKey,
-            ) -> Result<$type_name, JsError> {
-                catch_panic_result(|| {
-                    crate::high_level_api::$type_name::try_encrypt(value, &compressed_public_key.0)
-                        .map($type_name)
-                        .map_err(into_js_error)
-                })
-            }
+            // #[wasm_bindgen]
+            // pub fn encrypt_with_public_key(
+            //     value: $native_type,
+            //     public_key: &crate::js_on_wasm_api::js_high_level_api::keys::TfhePublicKey,
+            // ) -> Result<$type_name, JsError> {
+            //     catch_panic_result(|| {
+            //         crate::high_level_api::$type_name::try_encrypt(value, &public_key.0)
+            //             .map($type_name)
+            //             .map_err(into_js_error)
+            //     })
+            // }
+            //
+            // #[wasm_bindgen]
+            // pub fn encrypt_with_compressed_public_key(
+            //     value: $native_type,
+            //     compressed_public_key: &crate::js_on_wasm_api::js_high_level_api::keys::TfheCompressedPublicKey,
+            // ) -> Result<$type_name, JsError> {
+            //     catch_panic_result(|| {
+            //         crate::high_level_api::$type_name::try_encrypt(value, &compressed_public_key.0)
+            //             .map($type_name)
+            //             .map_err(into_js_error)
+            //     })
+            // }
 
             #[wasm_bindgen]
             pub fn encrypt_with_compact_public_key(
@@ -687,45 +692,45 @@ macro_rules! create_wrapper_type_that_has_native_type (
             }
 
 
-            #[wasm_bindgen]
-            pub fn decrypt(
-                &self,
-                client_key: &crate::js_on_wasm_api::js_high_level_api::keys::TfheClientKey,
-            ) -> Result<$native_type, JsError> {
-                catch_panic(|| self.0.decrypt(&client_key.0))
-            }
+            // #[wasm_bindgen]
+            // pub fn decrypt(
+            //     &self,
+            //     client_key: &crate::js_on_wasm_api::js_high_level_api::keys::TfheClientKey,
+            // ) -> Result<$native_type, JsError> {
+            //     catch_panic(|| self.0.decrypt(&client_key.0))
+            // }
 
             #[wasm_bindgen]
             pub fn serialize(&self) -> Result<Vec<u8>, JsError> {
                 catch_panic_result(|| bincode::serialize(&self.0).map_err(into_js_error))
             }
 
-            #[wasm_bindgen]
-            pub fn deserialize(buffer: &[u8]) -> Result<$type_name, JsError> {
-                catch_panic_result(|| {
-                    bincode::deserialize(buffer)
-                        .map($type_name)
-                        .map_err(into_js_error)
-                })
-            }
+            // #[wasm_bindgen]
+            // pub fn deserialize(buffer: &[u8]) -> Result<$type_name, JsError> {
+            //     catch_panic_result(|| {
+            //         bincode::deserialize(buffer)
+            //             .map($type_name)
+            //             .map_err(into_js_error)
+            //     })
+            // }
 
-            #[wasm_bindgen]
-            pub fn safe_serialize(&self, serialized_size_limit: u64) -> Result<Vec<u8>, JsError> {
-                let mut buffer = vec![];
-                catch_panic_result(|| crate::safe_deserialization::safe_serialize(&self.0, &mut buffer, serialized_size_limit)
-                    .map_err(into_js_error))?;
-
-                Ok(buffer)
-            }
-
-            #[wasm_bindgen]
-            pub fn safe_deserialize(buffer: &[u8], serialized_size_limit: u64) -> Result<$type_name, JsError> {
-                catch_panic_result(|| {
-                    crate::safe_deserialization::safe_deserialize(buffer, serialized_size_limit)
-                        .map(Self)
-                        .map_err(into_js_error)
-                })
-            }
+            // #[wasm_bindgen]
+            // pub fn safe_serialize(&self, serialized_size_limit: u64) -> Result<Vec<u8>, JsError> {
+            //     let mut buffer = vec![];
+            //     catch_panic_result(|| crate::safe_deserialization::safe_serialize(&self.0, &mut buffer, serialized_size_limit)
+            //         .map_err(into_js_error))?;
+            //
+            //     Ok(buffer)
+            // }
+            //
+            // #[wasm_bindgen]
+            // pub fn safe_deserialize(buffer: &[u8], serialized_size_limit: u64) -> Result<$type_name, JsError> {
+            //     catch_panic_result(|| {
+            //         crate::safe_deserialization::safe_deserialize(buffer, serialized_size_limit)
+            //             .map(Self)
+            //             .map_err(into_js_error)
+            //     })
+            // }
         }
         #[wasm_bindgen]
         pub struct $compressed_type_name(pub(crate) crate::high_level_api::$compressed_type_name);
@@ -1032,36 +1037,36 @@ create_wrapper_type_that_has_native_type!(
         proven_compact_list_type_name: ProvenCompactFheBoolList,
         native_type: bool,
     },
-    {
-        type_name: FheUint2,
-        compressed_type_name: CompressedFheUint2,
-        compact_type_name: CompactFheUint2,
-        compact_list_type_name: CompactFheUint2List,
-        proven_type: ProvenFheUint2,
-        proven_compact_type_name: ProvenCompactFheUint2,
-        proven_compact_list_type_name: ProvenCompactFheUint2List,
-        native_type: u8,
-    },
-    {
-        type_name: FheUint4,
-        compressed_type_name: CompressedFheUint4,
-        compact_type_name: CompactFheUint4,
-        compact_list_type_name: CompactFheUint4List,
-        proven_type: ProvenFheUint4,
-        proven_compact_type_name: ProvenCompactFheUint4,
-        proven_compact_list_type_name: ProvenCompactFheUint4List,
-        native_type: u8,
-    },
-    {
-        type_name: FheUint6,
-        compressed_type_name: CompressedFheUint6,
-        compact_type_name: CompactFheUint6,
-        compact_list_type_name: CompactFheUint6List,
-        proven_type: ProvenFheUint6,
-        proven_compact_type_name: ProvenCompactFheUint6,
-        proven_compact_list_type_name: ProvenCompactFheUint6List,
-        native_type: u8,
-    },
+    // {
+    //     type_name: FheUint2,
+    //     compressed_type_name: CompressedFheUint2,
+    //     compact_type_name: CompactFheUint2,
+    //     compact_list_type_name: CompactFheUint2List,
+    //     proven_type: ProvenFheUint2,
+    //     proven_compact_type_name: ProvenCompactFheUint2,
+    //     proven_compact_list_type_name: ProvenCompactFheUint2List,
+    //     native_type: u8,
+    // },
+    // {
+    //     type_name: FheUint4,
+    //     compressed_type_name: CompressedFheUint4,
+    //     compact_type_name: CompactFheUint4,
+    //     compact_list_type_name: CompactFheUint4List,
+    //     proven_type: ProvenFheUint4,
+    //     proven_compact_type_name: ProvenCompactFheUint4,
+    //     proven_compact_list_type_name: ProvenCompactFheUint4List,
+    //     native_type: u8,
+    // },
+    // {
+    //     type_name: FheUint6,
+    //     compressed_type_name: CompressedFheUint6,
+    //     compact_type_name: CompactFheUint6,
+    //     compact_list_type_name: CompactFheUint6List,
+    //     proven_type: ProvenFheUint6,
+    //     proven_compact_type_name: ProvenCompactFheUint6,
+    //     proven_compact_list_type_name: ProvenCompactFheUint6List,
+    //     native_type: u8,
+    // },
     {
         type_name: FheUint8,
         compressed_type_name: CompressedFheUint8,
@@ -1072,36 +1077,36 @@ create_wrapper_type_that_has_native_type!(
         proven_compact_list_type_name: ProvenCompactFheUint8List,
         native_type: u8,
     },
-    {
-        type_name: FheUint10,
-        compressed_type_name: CompressedFheUint10,
-        compact_type_name: CompactFheUint10,
-        compact_list_type_name: CompactFheUint10List,
-        proven_type: ProvenFheUint10,
-        proven_compact_type_name: ProvenCompactFheUint10,
-        proven_compact_list_type_name: ProvenCompactFheUint10List,
-        native_type: u16,
-    },
-    {
-        type_name: FheUint12,
-        compressed_type_name: CompressedFheUint12,
-        compact_type_name: CompactFheUint12,
-        compact_list_type_name: CompactFheUint12List,
-        proven_type: ProvenFheUint12,
-        proven_compact_type_name: ProvenCompactFheUint12,
-        proven_compact_list_type_name: ProvenCompactFheUint12List,
-        native_type: u16,
-    },
-    {
-        type_name: FheUint14,
-        compressed_type_name: CompressedFheUint14,
-        compact_type_name: CompactFheUint14,
-        compact_list_type_name: CompactFheUint14List,
-        proven_type: ProvenFheUint14,
-        proven_compact_type_name: ProvenCompactFheUint14,
-        proven_compact_list_type_name: ProvenCompactFheUint14List,
-        native_type: u16,
-    },
+    // {
+    //     type_name: FheUint10,
+    //     compressed_type_name: CompressedFheUint10,
+    //     compact_type_name: CompactFheUint10,
+    //     compact_list_type_name: CompactFheUint10List,
+    //     proven_type: ProvenFheUint10,
+    //     proven_compact_type_name: ProvenCompactFheUint10,
+    //     proven_compact_list_type_name: ProvenCompactFheUint10List,
+    //     native_type: u16,
+    // },
+    // {
+    //     type_name: FheUint12,
+    //     compressed_type_name: CompressedFheUint12,
+    //     compact_type_name: CompactFheUint12,
+    //     compact_list_type_name: CompactFheUint12List,
+    //     proven_type: ProvenFheUint12,
+    //     proven_compact_type_name: ProvenCompactFheUint12,
+    //     proven_compact_list_type_name: ProvenCompactFheUint12List,
+    //     native_type: u16,
+    // },
+    // {
+    //     type_name: FheUint14,
+    //     compressed_type_name: CompressedFheUint14,
+    //     compact_type_name: CompactFheUint14,
+    //     compact_list_type_name: CompactFheUint14List,
+    //     proven_type: ProvenFheUint14,
+    //     proven_compact_type_name: ProvenCompactFheUint14,
+    //     proven_compact_list_type_name: ProvenCompactFheUint14List,
+    //     native_type: u16,
+    // },
     {
         type_name: FheUint16,
         compressed_type_name: CompressedFheUint16,
@@ -1133,106 +1138,106 @@ create_wrapper_type_that_has_native_type!(
         native_type: u64,
     },
     // Signed
-    {
-        type_name: FheInt2,
-        compressed_type_name: CompressedFheInt2,
-        compact_type_name: CompactFheInt2,
-        compact_list_type_name: CompactFheInt2List,
-        proven_type: ProvenFheInt2,
-        proven_compact_type_name: ProvenCompactFheInt2,
-        proven_compact_list_type_name: ProvenCompactFheInt2List,
-        native_type: i8,
-    },
-    {
-        type_name: FheInt4,
-        compressed_type_name: CompressedFheInt4,
-        compact_type_name: CompactFheInt4,
-        compact_list_type_name: CompactFheInt4List,
-        proven_type: ProvenFheInt4,
-        proven_compact_type_name: ProvenCompactFheInt4,
-        proven_compact_list_type_name: ProvenCompactFheInt4List,
-        native_type: i8,
-    },
-    {
-        type_name: FheInt6,
-        compressed_type_name: CompressedFheInt6,
-        compact_type_name: CompactFheInt6,
-        compact_list_type_name: CompactFheInt6List,
-        proven_type: ProvenFheInt6,
-        proven_compact_type_name: ProvenCompactFheInt6,
-        proven_compact_list_type_name: ProvenCompactFheInt6List,
-        native_type: i8,
-    },
-    {
-        type_name: FheInt8,
-        compressed_type_name: CompressedFheInt8,
-        compact_type_name: CompactFheInt8,
-        compact_list_type_name: CompactFheInt8List,
-        proven_type: ProvenFheInt8,
-        proven_compact_type_name: ProvenCompactFheInt8,
-        proven_compact_list_type_name: ProvenCompactFheInt8List,
-        native_type: i8,
-    },
-    {
-        type_name: FheInt10,
-        compressed_type_name: CompressedFheInt10,
-        compact_type_name: CompactFheInt10,
-        compact_list_type_name: CompactFheInt10List,
-        proven_type: ProvenFheInt10,
-        proven_compact_type_name: ProvenCompactFheInt10,
-        proven_compact_list_type_name: ProvenCompactFheInt10List,
-        native_type: i16,
-    },
-    {
-        type_name: FheInt12,
-        compressed_type_name: CompressedFheInt12,
-        compact_type_name: CompactFheInt12,
-        compact_list_type_name: CompactFheInt12List,
-        proven_type: ProvenFheInt12,
-        proven_compact_type_name: ProvenCompactFheInt12,
-        proven_compact_list_type_name: ProvenCompactFheInt12List,
-        native_type: i16,
-    },
-    {
-        type_name: FheInt14,
-        compressed_type_name: CompressedFheInt14,
-        compact_type_name: CompactFheInt14,
-        compact_list_type_name: CompactFheInt14List,
-        proven_type: ProvenFheInt14,
-        proven_compact_type_name: ProvenCompactFheInt14,
-        proven_compact_list_type_name: ProvenCompactFheInt14List,
-        native_type: i16,
-    },
-    {
-        type_name: FheInt16,
-        compressed_type_name: CompressedFheInt16,
-        compact_type_name: CompactFheInt16,
-        compact_list_type_name: CompactFheInt16List,
-        proven_type: ProvenFheInt16,
-        proven_compact_type_name: ProvenCompactFheInt16,
-        proven_compact_list_type_name: ProvenCompactFheInt16List,
-        native_type: i16,
-    },
-        {
-        type_name: FheInt32,
-        compressed_type_name: CompressedFheInt32,
-        compact_type_name: CompactFheInt32,
-        compact_list_type_name: CompactFheInt32List,
-        proven_type: ProvenFheInt32,
-        proven_compact_type_name: ProvenCompactFheInt32,
-        proven_compact_list_type_name: ProvenCompactFheInt32List,
-        native_type: i32,
-    },
-    {
-        type_name: FheInt64,
-        compressed_type_name: CompressedFheInt64,
-        compact_type_name: CompactFheInt64,
-        compact_list_type_name: CompactFheInt64List,
-        proven_type: ProvenFheInt64,
-        proven_compact_type_name: ProvenCompactFheInt64,
-        proven_compact_list_type_name: ProvenCompactFheInt64List,
-        native_type: i64,
-    },
+    // {
+    //     type_name: FheInt2,
+    //     compressed_type_name: CompressedFheInt2,
+    //     compact_type_name: CompactFheInt2,
+    //     compact_list_type_name: CompactFheInt2List,
+    //     proven_type: ProvenFheInt2,
+    //     proven_compact_type_name: ProvenCompactFheInt2,
+    //     proven_compact_list_type_name: ProvenCompactFheInt2List,
+    //     native_type: i8,
+    // },
+    // {
+    //     type_name: FheInt4,
+    //     compressed_type_name: CompressedFheInt4,
+    //     compact_type_name: CompactFheInt4,
+    //     compact_list_type_name: CompactFheInt4List,
+    //     proven_type: ProvenFheInt4,
+    //     proven_compact_type_name: ProvenCompactFheInt4,
+    //     proven_compact_list_type_name: ProvenCompactFheInt4List,
+    //     native_type: i8,
+    // },
+    // {
+    //     type_name: FheInt6,
+    //     compressed_type_name: CompressedFheInt6,
+    //     compact_type_name: CompactFheInt6,
+    //     compact_list_type_name: CompactFheInt6List,
+    //     proven_type: ProvenFheInt6,
+    //     proven_compact_type_name: ProvenCompactFheInt6,
+    //     proven_compact_list_type_name: ProvenCompactFheInt6List,
+    //     native_type: i8,
+    // },
+    // {
+    //     type_name: FheInt8,
+    //     compressed_type_name: CompressedFheInt8,
+    //     compact_type_name: CompactFheInt8,
+    //     compact_list_type_name: CompactFheInt8List,
+    //     proven_type: ProvenFheInt8,
+    //     proven_compact_type_name: ProvenCompactFheInt8,
+    //     proven_compact_list_type_name: ProvenCompactFheInt8List,
+    //     native_type: i8,
+    // },
+    // {
+    //     type_name: FheInt10,
+    //     compressed_type_name: CompressedFheInt10,
+    //     compact_type_name: CompactFheInt10,
+    //     compact_list_type_name: CompactFheInt10List,
+    //     proven_type: ProvenFheInt10,
+    //     proven_compact_type_name: ProvenCompactFheInt10,
+    //     proven_compact_list_type_name: ProvenCompactFheInt10List,
+    //     native_type: i16,
+    // },
+    // {
+    //     type_name: FheInt12,
+    //     compressed_type_name: CompressedFheInt12,
+    //     compact_type_name: CompactFheInt12,
+    //     compact_list_type_name: CompactFheInt12List,
+    //     proven_type: ProvenFheInt12,
+    //     proven_compact_type_name: ProvenCompactFheInt12,
+    //     proven_compact_list_type_name: ProvenCompactFheInt12List,
+    //     native_type: i16,
+    // },
+    // {
+    //     type_name: FheInt14,
+    //     compressed_type_name: CompressedFheInt14,
+    //     compact_type_name: CompactFheInt14,
+    //     compact_list_type_name: CompactFheInt14List,
+    //     proven_type: ProvenFheInt14,
+    //     proven_compact_type_name: ProvenCompactFheInt14,
+    //     proven_compact_list_type_name: ProvenCompactFheInt14List,
+    //     native_type: i16,
+    // },
+    // {
+    //     type_name: FheInt16,
+    //     compressed_type_name: CompressedFheInt16,
+    //     compact_type_name: CompactFheInt16,
+    //     compact_list_type_name: CompactFheInt16List,
+    //     proven_type: ProvenFheInt16,
+    //     proven_compact_type_name: ProvenCompactFheInt16,
+    //     proven_compact_list_type_name: ProvenCompactFheInt16List,
+    //     native_type: i16,
+    // },
+    //     {
+    //     type_name: FheInt32,
+    //     compressed_type_name: CompressedFheInt32,
+    //     compact_type_name: CompactFheInt32,
+    //     compact_list_type_name: CompactFheInt32List,
+    //     proven_type: ProvenFheInt32,
+    //     proven_compact_type_name: ProvenCompactFheInt32,
+    //     proven_compact_list_type_name: ProvenCompactFheInt32List,
+    //     native_type: i32,
+    // },
+    // {
+    //     type_name: FheInt64,
+    //     compressed_type_name: CompressedFheInt64,
+    //     compact_type_name: CompactFheInt64,
+    //     compact_list_type_name: CompactFheInt64List,
+    //     proven_type: ProvenFheInt64,
+    //     proven_compact_type_name: ProvenCompactFheInt64,
+    //     proven_compact_list_type_name: ProvenCompactFheInt64List,
+    //     native_type: i64,
+    // },
 );
 
 // Note this used to be defined in "create_wrapper_type_that_has_native_type",
@@ -1268,54 +1273,54 @@ macro_rules! define_encrypt_list_with_compact_public_key {
 }
 
 define_encrypt_list_with_compact_public_key!(
-    {CompactFheUint2List, u8},
-    {CompactFheUint4List, u8},
-    {CompactFheUint6List, u8},
-    {CompactFheUint8List, u8},
-    {CompactFheUint12List, u16},
-    {CompactFheUint14List, u16},
-    {CompactFheUint16List, u16},
-    {CompactFheUint32List, u32},
-    {CompactFheUint64List, u64},
-    // Signed
-    {CompactFheInt2List, i8},
-    {CompactFheInt4List, i8},
-    {CompactFheInt6List, i8},
-    {CompactFheInt8List, i8},
-    {CompactFheInt12List, i16},
-    {CompactFheInt14List, i16},
-    {CompactFheInt16List, i16},
-    {CompactFheInt32List, i32},
-    {CompactFheInt64List, i64},
+    // {CompactFheUint2List, u8},
+    // {CompactFheUint4List, u8},
+    // {CompactFheUint6List, u8},
+    // {CompactFheUint8List, u8},
+    // // {CompactFheUint12List, u16},
+    // // {CompactFheUint14List, u16},
+    // {CompactFheUint16List, u16},
+    // {CompactFheUint32List, u32},
+    // {CompactFheUint64List, u64},
+    // // Signed
+    // // {CompactFheInt2List, i8},
+    // // {CompactFheInt4List, i8},
+    // // {CompactFheInt6List, i8},
+    // {CompactFheInt8List, i8},
+    // // {CompactFheInt12List, i16},
+    // // {CompactFheInt14List, i16},
+    // {CompactFheInt16List, i16},
+    // {CompactFheInt32List, i32},
+    // {CompactFheInt64List, i64},
 );
 
-// Since Vec<bool> is not wasm compatible, we handle conversions ourselves
-// clippy has some complaints to make, but we can't fulfill them, otherwise
-// wasm_bindgen fails to compile
-#[allow(clippy::use_self)]
-#[allow(clippy::needless_pass_by_value)]
-#[wasm_bindgen]
-impl CompactFheBoolList {
-    #[wasm_bindgen]
-    pub fn encrypt_with_compact_public_key(
-        values: Vec<JsValue>,
-        public_key: &crate::js_on_wasm_api::js_high_level_api::keys::TfheCompactPublicKey,
-    ) -> Result<CompactFheBoolList, JsError> {
-        catch_panic_result(|| {
-            let booleans = values
-                .iter()
-                .map(|jsvalue| {
-                    jsvalue
-                        .as_bool()
-                        .ok_or_else(|| JsError::new("Value is not a boolean"))
-                })
-                .collect::<Result<Vec<_>, JsError>>()?;
-            crate::high_level_api::CompactFheBoolList::try_encrypt(&booleans, &public_key.0)
-                .map(CompactFheBoolList)
-                .map_err(into_js_error)
-        })
-    }
-}
+// // Since Vec<bool> is not wasm compatible, we handle conversions ourselves
+// // clippy has some complaints to make, but we can't fulfill them, otherwise
+// // wasm_bindgen fails to compile
+// #[allow(clippy::use_self)]
+// #[allow(clippy::needless_pass_by_value)]
+// #[wasm_bindgen]
+// impl CompactFheBoolList {
+//     #[wasm_bindgen]
+//     pub fn encrypt_with_compact_public_key(
+//         values: Vec<JsValue>,
+//         public_key: &crate::js_on_wasm_api::js_high_level_api::keys::TfheCompactPublicKey,
+//     ) -> Result<CompactFheBoolList, JsError> {
+//         catch_panic_result(|| {
+//             let booleans = values
+//                 .iter()
+//                 .map(|jsvalue| {
+//                     jsvalue
+//                         .as_bool()
+//                         .ok_or_else(|| JsError::new("Value is not a boolean"))
+//                 })
+//                 .collect::<Result<Vec<_>, JsError>>()?;
+//             crate::high_level_api::CompactFheBoolList::try_encrypt(&booleans, &public_key.0)
+//                 .map(CompactFheBoolList)
+//                 .map_err(into_js_error)
+//         })
+//     }
+// }
 
 #[cfg(feature = "zk-pok-experimental")]
 macro_rules! define_prove_and_encrypt_list_with_compact_public_key {

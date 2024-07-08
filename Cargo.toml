@@ -12,8 +12,10 @@ members = [
 [profile.bench]
 lto = "fat"
 
+
 [profile.release]
 lto = "fat"
+opt-level = 's'
 
 [profile.release_lto_off]
 inherits = "release"

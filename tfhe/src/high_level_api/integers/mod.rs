@@ -1,26 +1,29 @@
 expand_pub_use_fhe_type!(
     pub use unsigned{
-        FheUint2, FheUint4, FheUint6, FheUint8, FheUint10, FheUint12, FheUint14, FheUint16,
+        FheUint8,
+        FheUint16,
         FheUint32, FheUint64, FheUint128, FheUint160, FheUint256
     };
 );
 
-expand_pub_use_fhe_type!(
-    pub use signed{
-        FheInt2, FheInt4, FheInt6, FheInt8, FheInt10, FheInt12, FheInt14, FheInt16,
-        FheInt32, FheInt64, FheInt128, FheInt160, FheInt256
-    };
-);
+// expand_pub_use_fhe_type!(
+//     pub use signed{
+//         // FheInt2, FheInt4, FheInt6,
+//         FheInt8,
+//         // FheInt10, FheInt12, FheInt14,
+//         FheInt16, FheInt32, FheInt64, FheInt128, FheInt160, FheInt256
+//     };
+// );
 
-pub(in crate::high_level_api) use signed::FheIntId;
+// pub(in crate::high_level_api) use signed::FheIntId;
 pub(in crate::high_level_api) use unsigned::FheUintId;
 // These are pub-exported so that their doc can appear in generated rust docs
 use crate::shortint::MessageModulus;
-pub use signed::{CompactFheInt, CompactFheIntList, CompressedFheInt, FheInt};
+// pub use signed::{CompactFheInt, CompactFheIntList, CompressedFheInt, FheInt};
 pub use unsigned::{CompactFheUint, CompactFheUintList, CompressedFheUint, FheUint};
 
-pub mod oprf;
-mod signed;
+// pub mod oprf;
+// mod signed;
 mod unsigned;
 
 /// Trait to mark ID type for integers

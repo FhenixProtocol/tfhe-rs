@@ -1,8 +1,8 @@
-use crate::high_level_api::integers::{FheIntId, FheUintId};
+use crate::high_level_api::integers::{FheUintId};
 use crate::integer::BooleanBlock;
 use crate::prelude::FheKeyswitch;
 pub use crate::shortint::parameters::key_switching::ShortintKeySwitchingParameters;
-use crate::{ClientKey, FheBool, FheInt, FheUint, ServerKey};
+use crate::{ClientKey, FheBool, FheUint, ServerKey};
 use std::fmt::{Display, Formatter};
 
 #[derive(Copy, Clone, Debug)]
@@ -63,17 +63,6 @@ where
         let radix = input.ciphertext.on_cpu();
         let casted = self.key.cast(&*radix);
         FheUint::new(casted)
-    }
-}
-
-impl<Id> FheKeyswitch<FheInt<Id>> for KeySwitchingKey
-where
-    Id: FheIntId,
-{
-    fn keyswitch(&self, input: &FheInt<Id>) -> FheInt<Id> {
-        let radix = input.ciphertext.on_cpu();
-        let casted = self.key.cast(&*radix);
-        FheInt::new(casted)
     }
 }
 

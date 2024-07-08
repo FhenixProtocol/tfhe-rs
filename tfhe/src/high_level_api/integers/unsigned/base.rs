@@ -1,7 +1,7 @@
 use super::inner::RadixCiphertext;
 use crate::conformance::ParameterSetConformant;
 use crate::core_crypto::prelude::{CastFrom, UnsignedNumeric};
-use crate::high_level_api::integers::signed::{FheInt, FheIntId};
+// use crate::high_level_api::integers::signed::{FheInt, FheIntId};
 use crate::high_level_api::integers::IntegerId;
 use crate::high_level_api::keys::InternalServerKey;
 use crate::high_level_api::{global_state, Device};
@@ -541,43 +541,43 @@ where
     }
 }
 
-impl<FromId, IntoId> CastFrom<FheInt<FromId>> for FheUint<IntoId>
-where
-    FromId: FheIntId,
-    IntoId: FheUintId,
-{
-    /// Cast a FheInt to an FheUint
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// use tfhe::prelude::*;
-    /// use tfhe::{generate_keys, set_server_key, ConfigBuilder, FheInt32, FheUint16};
-    ///
-    /// let (client_key, server_key) = generate_keys(ConfigBuilder::default());
-    /// set_server_key(server_key);
-    ///
-    /// let a = FheInt32::encrypt(i32::MIN, &client_key);
-    /// let b = FheUint16::cast_from(a);
-    ///
-    /// let decrypted: u16 = b.decrypt(&client_key);
-    /// assert_eq!(decrypted, i32::MIN as u16);
-    /// ```
-    fn cast_from(input: FheInt<FromId>) -> Self {
-        global_state::with_internal_keys(|keys| {
-            #[allow(irrefutable_let_patterns)]
-            let InternalServerKey::Cpu(integer_key) = keys
-            else {
-                panic!("Cuda devices do not support signed integers");
-            };
-            let casted = integer_key.pbs_key().cast_to_unsigned(
-                input.ciphertext.into_cpu(),
-                IntoId::num_blocks(integer_key.message_modulus()),
-            );
-            Self::new(casted)
-        })
-    }
-}
+// impl<FromId, IntoId> CastFrom<FheInt<FromId>> for FheUint<IntoId>
+// where
+//     FromId: FheIntId,
+//     IntoId: FheUintId,
+// {
+//     /// Cast a FheInt to an FheUint
+//     ///
+//     /// # Example
+//     ///
+//     /// ```rust
+//     /// use tfhe::prelude::*;
+//     /// use tfhe::{generate_keys, set_server_key, ConfigBuilder, FheInt32, FheUint16};
+//     ///
+//     /// let (client_key, server_key) = generate_keys(ConfigBuilder::default());
+//     /// set_server_key(server_key);
+//     ///
+//     /// let a = FheInt32::encrypt(i32::MIN, &client_key);
+//     /// let b = FheUint16::cast_from(a);
+//     ///
+//     /// let decrypted: u16 = b.decrypt(&client_key);
+//     /// assert_eq!(decrypted, i32::MIN as u16);
+//     /// ```
+//     fn cast_from(input: FheInt<FromId>) -> Self {
+//         global_state::with_internal_keys(|keys| {
+//             #[allow(irrefutable_let_patterns)]
+//             let InternalServerKey::Cpu(integer_key) = keys
+//             else {
+//                 panic!("Cuda devices do not support signed integers");
+//             };
+//             let casted = integer_key.pbs_key().cast_to_unsigned(
+//                 input.ciphertext.into_cpu(),
+//                 IntoId::num_blocks(integer_key.message_modulus()),
+//             );
+//             Self::new(casted)
+//         })
+//     }
+// }
 
 impl<FromId, IntoId> CastFrom<FheUint<FromId>> for FheUint<IntoId>
 where
