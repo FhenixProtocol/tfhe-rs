@@ -409,6 +409,13 @@ build_node_js_api: install_rs_build_toolchain install_wasm_pack
 		wasm-pack build --release --target=nodejs \
 		-- --features=boolean-client-js-wasm-api,shortint-client-js-wasm-api,integer-client-js-wasm-api
 
+.PHONY: build_node_js_esm_api # Build the js API targeting nodejs
+build_node_js_esm_api: install_rs_build_toolchain install_wasm_pack
+	cd tfhe && \
+	RUSTFLAGS="$(WASM_RUSTFLAGS)" rustup run "$(RS_BUILD_TOOLCHAIN)" \
+		wasm-pack build --release --target=bundler \
+		-- --features=boolean-client-js-wasm-api,shortint-client-js-wasm-api,integer-client-js-wasm-api
+
 .PHONY: build_concrete_csprng # Build concrete_csprng
 build_concrete_csprng: install_rs_build_toolchain
 	RUSTFLAGS="$(RUSTFLAGS)" cargo $(CARGO_RS_BUILD_TOOLCHAIN) build --profile $(CARGO_PROFILE) \
